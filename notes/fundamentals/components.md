@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/fundamentals/components.md`
 
-````markdown
 # 🧱 React Components — Complete Guide
 
 > Components are the building blocks of any React application. They are reusable, composable, and define the UI structure and behavior.
