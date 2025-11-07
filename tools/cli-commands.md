@@ -1,4 +1,3 @@
-````markdown
 # CLI Commands for React / Next.js / Vite Projects
 
 This guide provides commonly used command-line interface (CLI) commands for React, Next.js, Vite, Git, Node.js, and general development workflows.
