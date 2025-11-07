@@ -1,4 +1,3 @@
-````markdown
 # Tailwind CSS Setup
 
 Tailwind CSS is a **utility-first CSS framework** for rapidly building modern web UIs. This guide covers setup for **React, Vite, and Next.js** projects.
