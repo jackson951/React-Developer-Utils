@@ -1,27 +1,32 @@
-# Husky Setup for Git Hooks
 
-Husky allows you to **run scripts automatically on Git hooks**, like `pre-commit` or `pre-push`. This is useful to **lint, format, and test code** before committing.
+### 📘 **File:** `notes/fundamentals/husky-setup.md`
+
+# 🐶 Husky Setup for Git Hooks
+
+> **Husky** lets you automatically run scripts on Git hooks — such as `pre-commit` or `pre-push`.
+> It’s ideal for ensuring **linting, formatting, and testing** happen before code is committed.
 
 ---
 
-## 1️⃣ Install Husky
+## ⚙️ 1️⃣ Install Husky
 
 ```bash
 npm install --save-dev husky
 ```
-````
 
 ---
 
-## 2️⃣ Initialize Husky
+## 🚀 2️⃣ Initialize Husky
 
 ```bash
 npx husky install
 ```
 
-> This will create a `.husky/` directory in your project root.
+> This command creates a `.husky/` directory in your project root.
 
-### Optional: Add install script to package.json
+### 🧩 Optional: Auto-install Husky
+
+Add this to your `package.json`:
 
 ```json
 {
@@ -31,18 +36,18 @@ npx husky install
 }
 ```
 
-> This ensures Husky is automatically installed when someone runs `npm install`.
+> 💡 This ensures Husky is set up automatically after `npm install`.
 
 ---
 
-## 3️⃣ Add a Pre-Commit Hook
+## 🧹 3️⃣ Add a Pre-Commit Hook
 
 ```bash
 npx husky add .husky/pre-commit "npm run lint:fix"
 ```
 
-- Runs `npm run lint:fix` before every commit.
-- Make the hook executable:
+* Runs ESLint with auto-fix before every commit.
+* Make the hook executable (especially on Unix/macOS):
 
 ```bash
 chmod +x .husky/pre-commit
@@ -50,27 +55,28 @@ chmod +x .husky/pre-commit
 
 ---
 
-## 4️⃣ Add a Pre-Push Hook (Optional)
+## 🧪 4️⃣ Add a Pre-Push Hook (Optional)
 
 ```bash
 npx husky add .husky/pre-push "npm test"
 ```
 
-- Ensures tests pass before pushing to remote.
+* Ensures all tests pass **before pushing to remote**.
 
 ---
 
-## 5️⃣ Integrating with Lint-Staged
+## 🪄 5️⃣ Integrating with Lint-Staged
 
-**Lint-Staged** allows you to **run scripts only on staged files** instead of the whole project.
+> **Lint-Staged** allows you to run scripts only on **staged files**,
+> which makes commits faster and more efficient.
 
-### Install Lint-Staged
+### 🔧 Install Lint-Staged
 
 ```bash
 npm install --save-dev lint-staged
 ```
 
-### Add configuration in package.json
+### 📦 Add Configuration to `package.json`
 
 ```json
 "lint-staged": {
@@ -84,30 +90,37 @@ npm install --save-dev lint-staged
 }
 ```
 
-### Update Pre-Commit Hook
+### 🧩 Update the Pre-Commit Hook
 
 ```bash
 npx husky add .husky/pre-commit "npx lint-staged"
 ```
 
+Now, only staged files will be linted and formatted automatically.
+
 ---
 
-## 6️⃣ Example Workflow
+## 🔁 6️⃣ Example Workflow
 
-1. Developer modifies files.
+1. Developer edits files
 2. Runs `git add .`
-3. On commit, Husky triggers `pre-commit` hook.
-4. Lint-Staged formats and fixes staged files automatically.
-5. Commit only succeeds if all checks pass.
+3. On commit, Husky triggers `pre-commit`
+4. Lint-Staged runs ESLint + Prettier on staged files
+5. Commit completes **only if all checks pass**
+
+✅ **Result:**
+Clean, consistent code — no broken commits on main.
 
 ---
 
-## 7️⃣ Useful Links
+## 📚 7️⃣ Useful Resources
 
-- [Husky Official Docs](https://typicode.github.io/husky/#/)
-- [Lint-Staged GitHub](https://github.com/okonet/lint-staged)
-- [Integrating Husky with ESLint & Prettier](https://dev.to/namirsab/comment/2c60)
+* [🐶 Husky Official Docs](https://typicode.github.io/husky/#/)
+* [🧹 Lint-Staged GitHub](https://github.com/okonet/lint-staged)
+* [🧩 Integrating Husky with ESLint & Prettier](https://dev.to/namirsab/comment/2c60)
 
 ---
 
-> 💡 Tip: Using Husky + Lint-Staged ensures **clean code** and prevents **bad commits** from entering your main branches.
+> 💡 **Pro Tip:**
+> Combining **Husky + Lint-Staged + ESLint + Prettier** creates a seamless
+> workflow that **prevents bad commits** and **keeps your codebase clean**.
