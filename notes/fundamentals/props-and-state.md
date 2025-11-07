@@ -2,8 +2,8 @@
 
 # 🧩 Props & State in React
 
-> Props and state are the two core ways to manage data in React components.  
-> Props are **external inputs**, while state is **internal, mutable data**.
+> Props and state are the two core ways to manage data in React components.
+> **Props** are external inputs, while **state** is internal, mutable data.
 
 ---
 
@@ -23,10 +23,9 @@ function Greeting({ name, age }) {
 // Usage
 <Greeting name="Jackson" age={24} />;
 ```
-````
 
-- Props are **read-only** — child components should not modify them.
-- You can set **default props**:
+* Props are **read-only** — child components should **not modify them**.
+* You can set **default props**:
 
 ```jsx
 Greeting.defaultProps = {
@@ -34,7 +33,7 @@ Greeting.defaultProps = {
 };
 ```
 
-- With TypeScript:
+* With **TypeScript**:
 
 ```ts
 type GreetingProps = {
@@ -72,8 +71,8 @@ function Counter() {
 }
 ```
 
-- `useState(initialValue)` returns `[state, setState]`
-- Updating state triggers **re-render** of the component
+* `useState(initialValue)` returns `[state, setState]`
+* Updating state triggers a **re-render** of the component
 
 ---
 
@@ -82,6 +81,8 @@ function Counter() {
 When multiple components need the **same state**, lift it to their **nearest common parent**.
 
 ```jsx
+import { useState } from "react";
+
 function Parent() {
   const [text, setText] = useState("");
 
@@ -102,22 +103,24 @@ function Display({ value }) {
 }
 ```
 
-✅ Ensures **single source of truth** for shared data.
+✅ Ensures a **single source of truth** for shared data.
 
 ---
 
 ## 🧩 4. Controlled vs Uncontrolled Components
 
-**Controlled:** React state drives the input
+**Controlled Component:** React state drives the input.
 
 ```jsx
+import { useState } from "react";
+
 function ControlledInput() {
   const [value, setValue] = useState("");
   return <input value={value} onChange={(e) => setValue(e.target.value)} />;
 }
 ```
 
-**Uncontrolled:** DOM manages its own state
+**Uncontrolled Component:** The DOM manages its own state.
 
 ```jsx
 import { useRef } from "react";
@@ -125,7 +128,13 @@ import { useRef } from "react";
 function UncontrolledInput() {
   const ref = useRef();
   const handleSubmit = () => console.log(ref.current.value);
-  return <input ref={ref} />;
+
+  return (
+    <>
+      <input ref={ref} />
+      <button onClick={handleSubmit}>Log Value</button>
+    </>
+  );
 }
 ```
 
@@ -133,13 +142,13 @@ function UncontrolledInput() {
 
 ## ⚡ 5. Functional Updates
 
-When new state depends on previous state:
+When new state depends on the previous state:
 
 ```jsx
 setCount((prevCount) => prevCount + 1);
 ```
 
-✅ Avoids stale state when updates are asynchronous.
+✅ Prevents **stale state** when updates are asynchronous.
 
 ---
 
@@ -162,34 +171,35 @@ function Button({ onClick }) {
 
 ## 🔧 7. Patterns for State Management
 
-- **Local state** → `useState` in single component
-- **Shared state** → lift state up
-- **Global state** → Context API, Zustand, or Redux
-- **Server state** → React Query / TanStack Query
+* **Local state** → `useState` inside a single component
+* **Shared state** → Lift state up to a common parent
+* **Global state** → Context API, Zustand, or Redux
+* **Server state** → React Query / TanStack Query
 
 ---
 
 ## 🧭 8. Best Practices
 
-- Keep **state minimal** — compute derived values instead of storing them
-- Avoid deeply nested state objects; split if needed
-- Lift state **only when necessary**
-- Use **descriptive prop names** for clarity
-- Default props for optional values
-- Prefer **function components** with hooks over class components
+* Keep **state minimal** — derive computed values instead of storing them
+* Avoid **deeply nested state** objects; split into smaller parts
+* Lift state **only when necessary**
+* Use **descriptive prop names**
+* Provide **default props** for optional values
+* Prefer **function components** with hooks over class components
 
 ---
 
 ## 🔗 9. Resources
 
-- [React Docs – State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
-- [React Docs – Lifting State Up](https://reactjs.org/docs/lifting-state-up.html)
-- [React Docs – Forms](https://reactjs.org/docs/forms.html)
-- [React Docs – Controlled Components](https://reactjs.org/docs/forms.html#controlled-components)
+* [React Docs – State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
+* [React Docs – Lifting State Up](https://reactjs.org/docs/lifting-state-up.html)
+* [React Docs – Forms](https://reactjs.org/docs/forms.html)
+* [React Docs – Controlled Components](https://reactjs.org/docs/forms.html#controlled-components)
 
 ---
 
 ✅ **Summary**
 
-> Props and state are the **backbone of React data flow**.
-> Props pass data **down**, state stores **mutable internal data**, and lifting state enables **shared control** across components.
+> Props and state form the **backbone of React’s data flow**.
+> **Props** pass data **down** the component tree, **state** manages internal data,
+> and **lifting state** enables shared control across components.
