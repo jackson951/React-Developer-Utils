@@ -1,15 +1,18 @@
-# Next.js Configuration (`next.config.js` / `next.config.mjs`)
+### 📘 **File:** `notes/fundamentals/next-config.md`
 
-Next.js uses a configuration file to customize the build, runtime, and development behavior of your project. This file is usually named:
+# ⚙️ Next.js Configuration (`next.config.js` / `next.config.mjs`)
 
-- `next.config.js` (CommonJS)
-- `next.config.mjs` (ES Modules)
+> The Next.js configuration file customizes **build, runtime, and development behavior**.
+> Depending on your module system, it can be:
+>
+> * `next.config.js` → CommonJS format
+> * `next.config.mjs` → ES Modules format
 
 ---
 
-## 1️⃣ Basic Configuration
+## 🧩 1️⃣ Basic Configuration
 
-Create `next.config.js` in the project root:
+Create a `next.config.js` file at the project root:
 
 ```js
 /** @type {import('next').NextConfig} */
@@ -20,9 +23,8 @@ const nextConfig = {
 
 module.exports = nextConfig;
 ```
-````
 
-Or with ES Modules (`next.config.mjs`):
+### 🧠 ES Modules Alternative (`next.config.mjs`)
 
 ```js
 import { defineConfig } from "next";
@@ -33,22 +35,22 @@ export default defineConfig({
 });
 ```
 
-> ⚠️ If using ES Modules, **do not use `__dirname`** or CommonJS syntax.
+> ⚠️ When using ESM, **avoid CommonJS syntax** (`require`, `module.exports`, `__dirname`).
 
 ---
 
-## 2️⃣ Common Configuration Options
+## ⚡ 2️⃣ Common Configuration Options
 
-| Option                 | Description                                    |
-| ---------------------- | ---------------------------------------------- |
-| `reactStrictMode`      | Enables React Strict Mode for dev warnings     |
-| `swcMinify`            | Uses SWC for minification (faster than Terser) |
-| `images.domains`       | Allows external image domains in `<Image />`   |
-| `experimental.appDir`  | Enables the new App Router (`src/app`)         |
-| `i18n`                 | Configure internationalization/localization    |
-| `output: 'standalone'` | For Docker-friendly builds                     |
+| Option                 | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `reactStrictMode`      | Enables React’s Strict Mode for development      |
+| `swcMinify`            | Uses SWC for faster JS minification              |
+| `images.domains`       | Defines allowed external domains for `<Image />` |
+| `experimental.appDir`  | Enables the **App Router** (`src/app`)           |
+| `i18n`                 | Configures internationalization/localization     |
+| `output: 'standalone'` | Prepares app for Docker or standalone deploys    |
 
-Example with images & App Router:
+### Example with Images & App Router
 
 ```js
 /** @type {import('next').NextConfig} */
@@ -68,10 +70,15 @@ module.exports = nextConfig;
 
 ---
 
-## 3️⃣ Environment Variables
+## 🌍 3️⃣ Environment Variables
 
-- Use `.env.local`, `.env.development`, or `.env.production` to define environment variables.
-- Access in Next.js with `process.env.MY_VAR` or `next.config.js` `env` property:
+* Define environment variables in:
+
+  * `.env.local`
+  * `.env.development`
+  * `.env.production`
+
+Access them via `process.env` or expose them through the config file:
 
 ```js
 const nextConfig = {
@@ -81,13 +88,14 @@ const nextConfig = {
 };
 ```
 
-> ✅ Prefix with `NEXT_PUBLIC_` if you need it accessible in the browser.
+> ✅ Variables prefixed with `NEXT_PUBLIC_` are accessible in the **browser**.
+> Use this prefix for frontend-safe values (e.g., API URLs).
 
 ---
 
-## 4️⃣ Aliases
+## 🧭 4️⃣ Path Aliases
 
-To simplify imports, configure path aliases in `jsconfig.json` or `tsconfig.json`:
+Simplify imports by defining **path aliases** in `jsconfig.json` or `tsconfig.json`:
 
 ```json
 {
@@ -100,30 +108,36 @@ To simplify imports, configure path aliases in `jsconfig.json` or `tsconfig.json
 }
 ```
 
-Then import:
+Example usage:
 
 ```js
 import Button from "@/components/Button";
 ```
 
----
-
-## 5️⃣ Useful Tips
-
-- **Turbopack**: Next.js 16 uses Turbopack for faster dev builds.
-- **Linting**: Next.js auto-configures ESLint.
-- **Static Export**: Use `next export` for static-only projects.
-- **Next Fonts**: Use Google Fonts via `next/font/google`.
+> 💡 Makes refactoring easier and keeps imports clean across large projects.
 
 ---
 
-## 6️⃣ Useful Links
+## 🧰 5️⃣ Useful Tips & Features
 
-- [Next.js Config Docs](https://nextjs.org/docs/api-reference/next.config.js/introduction)
-- [App Router Guide](https://nextjs.org/docs/app)
-- [Next.js Environment Variables](https://nextjs.org/docs/pages/building-your-application/environment-variables)
-- [Next.js Turbopack](https://nextjs.org/docs/app/building/turbopack)
+* **⚡ Turbopack** → Next.js 16+ uses Turbopack for lightning-fast dev builds.
+* **🧹 Built-in Linting** → Next.js automatically integrates ESLint.
+* **📦 Static Export** → Use `next export` for fully static sites.
+* **🅰️ Next Fonts** → Use `next/font/google` for optimized Google Fonts.
+* **🔒 Secrets** → Never hardcode API keys or secrets — use `.env` files.
 
 ---
 
-> 💡 Tip: Keep your `next.config.js` minimal and use environment variables for secrets or environment-specific configs.
+## 🔗 6️⃣ Helpful Resources
+
+* [📘 Next.js Config Docs](https://nextjs.org/docs/api-reference/next.config.js/introduction)
+* [📂 App Router Guide](https://nextjs.org/docs/app)
+* [🌍 Environment Variables](https://nextjs.org/docs/pages/building-your-application/environment-variables)
+* [⚡ Turbopack Overview](https://nextjs.org/docs/app/building/turbopack)
+
+---
+
+> 💡 **Pro Tip:**
+> Keep your `next.config.js` minimal — rely on environment variables and modular configs
+> for flexibility across environments (development, staging, production).
+
