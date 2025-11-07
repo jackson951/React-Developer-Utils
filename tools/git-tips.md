@@ -1,4 +1,3 @@
-````markdown
 # Git Tips & Tricks for Developers
 
 This guide provides essential **Git commands, workflows, and best practices** for day-to-day development. Perfect for React, Next.js, or Vite projects.
