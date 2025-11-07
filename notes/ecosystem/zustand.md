@@ -1,6 +1,6 @@
 ### 📘 **File:** `notes/ecosystem/zustand.md`
 
-````markdown
+
 # 🧩 Zustand — Complete Guide for React State Management
 
 > Zustand is a small, fast, and scalable state management library for React.  
