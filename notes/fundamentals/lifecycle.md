@@ -1,8 +1,9 @@
 ### 📘 **File:** `notes/fundamentals/lifecycle.md`
+
 # 🔄 React Component Lifecycle
 
-> React components go through **lifecycle stages**: Mounting, Updating, and Unmounting.  
-> Function components use **Hooks** while class components use **lifecycle methods**.
+> React components go through **lifecycle stages**: Mounting, Updating, and Unmounting.
+> Function components use **Hooks**, while class components use **lifecycle methods**.
 
 ---
 
@@ -10,7 +11,7 @@
 
 | Phase      | Class Methods / Hooks                               | Description                                        |
 | ---------- | --------------------------------------------------- | -------------------------------------------------- |
-| Mounting   | constructor → render → componentDidMount            | Component is created and inserted into DOM         |
+| Mounting   | constructor → render → componentDidMount            | Component is created and inserted into the DOM     |
 | Updating   | shouldComponentUpdate → render → componentDidUpdate | Component is re-rendered due to props/state change |
 | Unmounting | componentWillUnmount                                | Component is removed from the DOM                  |
 
@@ -46,8 +47,9 @@ class Timer extends Component {
     return <p>Seconds: {this.state.seconds}</p>;
   }
 }
+
+export default Timer;
 ```
-````
 
 **Function Component (Hooks) Example:**
 
@@ -64,6 +66,8 @@ function Timer() {
 
   return <p>Seconds: {seconds}</p>;
 }
+
+export default Timer;
 ```
 
 ---
@@ -95,8 +99,7 @@ useEffect(() => {
 ## 🧱 4. Unmounting Phase
 
 Triggered when the component is **removed from the DOM**.
-
-- Use for cleanup: timers, subscriptions, event listeners.
+Use this phase for **cleanup** — timers, subscriptions, or event listeners.
 
 ```jsx
 useEffect(() => {
@@ -118,49 +121,49 @@ useEffect(() => {
 
 ---
 
-## 🔧 6. useEffect Dependency Array
+## 🔧 6. `useEffect` Dependency Array
 
-- `[]` → run **once on mount**
-- `[dep]` → run when `dep` changes
-- No array → run **after every render** (rarely recommended)
+* `[]` → run **once on mount**
+* `[dep]` → run when **`dep` changes**
+* *(no array)* → run **after every render** (⚠️ rarely recommended)
 
 ---
 
 ## 🌐 7. Multiple Effects
 
+You can split effects by concern to keep logic clean:
+
 ```jsx
 useEffect(() => {
-  console.log("Effect 1");
+  console.log("Effect 1 — run once");
 }, []);
 
 useEffect(() => {
-  console.log("Effect 2, depends on count");
+  console.log("Effect 2 — depends on count");
 }, [count]);
 ```
-
-✅ You can split effects by responsibility for cleaner code.
 
 ---
 
 ## 💡 8. Best Practices
 
-- Prefer **function components with hooks**
-- Cleanup timers and subscriptions to prevent memory leaks
-- Use **dependency arrays** carefully in `useEffect`
-- Use `React.memo` and `useCallback` to optimize updates
-- Avoid side effects in render — always use `useEffect`
+* Prefer **function components with hooks**
+* Always **cleanup** timers, subscriptions, and listeners
+* Use dependency arrays **carefully** in `useEffect`
+* Use `React.memo` and `useCallback` to optimize re-renders
+* Avoid side effects inside `render()` — use `useEffect` instead
 
 ---
 
 ## 🔗 9. Resources
 
-- [React Docs – State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
-- [React Docs – Using the Effect Hook](https://reactjs.org/docs/hooks-effect.html)
-- [React Patterns – Lifecycle with Hooks](https://reactpatterns.com/#useeffect)
+* [React Docs – State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
+* [React Docs – Using the Effect Hook](https://reactjs.org/docs/hooks-effect.html)
+* [React Patterns – Lifecycle with Hooks](https://reactpatterns.com/#useeffect)
 
 ---
 
 ✅ **Summary**
 
 > React lifecycle controls **how and when components mount, update, and unmount**.
-> Hooks like `useEffect` replace class lifecycle methods, making functional components the modern standard.
+> Hooks like `useEffect` replace class lifecycle methods, making **function components the modern standard**.
