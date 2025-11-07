@@ -1,6 +1,6 @@
 ### 📘 **File:** `notes/ecosystem/nextjs-tips.md`
 
-````markdown
+
 # ⚡ Next.js Tips & Best Practices
 
 > A collection of practical tips, patterns, and gotchas for building production-grade Next.js applications.
