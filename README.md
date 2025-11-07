@@ -1,7 +1,3 @@
-Here's a **complete `README.md`** for your `react-developer-utils/` repo — professional, well-structured, and developer-friendly. It explains the purpose, structure, setup, and how to use each part of the toolkit.
-
----
-
 # 🧰 `react-developer-utils`
 
 _A personal knowledge base, snippet library, and dev toolkit for modern React developers (2025+)._
@@ -98,7 +94,7 @@ react-developer-utils/
 ### 1. Clone & Explore
 
 ```bash
-git clone https://github.com/your-username/react-developer-utils.git
+git clone https://github.com/jackson951/react-developer-utils.git
 cd react-developer-utils
 code .  # Opens in VS Code
 ```
