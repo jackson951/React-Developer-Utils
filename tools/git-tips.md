@@ -1,44 +1,46 @@
-# Git Tips & Tricks for Developers
+### 📘 **File:** `notes/fundamentals/git-tips-tricks.md`
 
-This guide provides essential **Git commands, workflows, and best practices** for day-to-day development. Perfect for React, Next.js, or Vite projects.
+# 🌿 Git Tips & Tricks for Developers
+
+> Essential **Git commands, workflows, and best practices** for daily development.
+> Perfect for projects built with **React**, **Next.js**, or **Vite**.
 
 ---
 
-## 1️⃣ Basic Git Commands
+## 🧩 1️⃣ Basic Git Commands
 
-### Initialize a repository
+### 🔹 Initialize a Repository
 
 ```bash
 git init
 ```
-````
 
-### Check repository status
+### 🔹 Check Repository Status
 
 ```bash
 git status
 ```
 
-### Add files to staging
+### 🔹 Add Files to Staging
 
 ```bash
 git add .
 git add <file-path>
 ```
 
-### Commit changes
+### 🔹 Commit Changes
 
 ```bash
 git commit -m "Your commit message"
 ```
 
-### Push to remote repository
+### 🔹 Push to Remote Repository
 
 ```bash
 git push origin main
 ```
 
-### Pull latest changes
+### 🔹 Pull Latest Changes
 
 ```bash
 git pull origin main
@@ -46,33 +48,33 @@ git pull origin main
 
 ---
 
-## 2️⃣ Branching & Merging
+## 🌱 2️⃣ Branching & Merging
 
-### Create a new branch
+### 🔹 Create a New Branch
 
 ```bash
 git branch <branch-name>
 ```
 
-### Switch to a branch
+### 🔹 Switch to a Branch
 
 ```bash
 git checkout <branch-name>
 ```
 
-### Create and switch in one command
+### 🔹 Create & Switch in One Command
 
 ```bash
 git switch -c <branch-name>
 ```
 
-### Merge a branch into current
+### 🔹 Merge a Branch into Current
 
 ```bash
 git merge <branch-name>
 ```
 
-### Delete a branch
+### 🔹 Delete a Branch
 
 ```bash
 git branch -d <branch-name>
@@ -80,27 +82,27 @@ git branch -d <branch-name>
 
 ---
 
-## 3️⃣ Stashing Changes
+## 💾 3️⃣ Stashing Changes
 
-Temporarily save uncommitted changes:
+Temporarily save uncommitted work:
 
 ```bash
 git stash
 ```
 
-Apply latest stash:
+### 🔹 Apply Latest Stash
 
 ```bash
 git stash apply
 ```
 
-List all stashes:
+### 🔹 List All Stashes
 
 ```bash
 git stash list
 ```
 
-Pop (apply and remove) latest stash:
+### 🔹 Pop (Apply + Remove) Latest Stash
 
 ```bash
 git stash pop
@@ -108,27 +110,27 @@ git stash pop
 
 ---
 
-## 4️⃣ Undo Changes
+## 🧹 4️⃣ Undoing Changes
 
-### Unstage a file
+### 🔹 Unstage a File (keep changes)
 
 ```bash
 git restore --staged <file-path>
 ```
 
-### Discard changes in working directory
+### 🔹 Discard Local Changes
 
 ```bash
 git restore <file-path>
 ```
 
-### Reset last commit but keep changes
+### 🔹 Undo Last Commit but Keep Changes
 
 ```bash
 git reset --soft HEAD~1
 ```
 
-### Hard reset to a specific commit (WARNING: loses changes)
+### ⚠️ Hard Reset to Specific Commit (irreversible)
 
 ```bash
 git reset --hard <commit-hash>
@@ -136,27 +138,27 @@ git reset --hard <commit-hash>
 
 ---
 
-## 5️⃣ Viewing History
+## 🕓 5️⃣ Viewing History
 
-### Show commit history
+### 🔹 View Commit History
 
 ```bash
 git log
 ```
 
-### Short one-line log
+### 🔹 Compact One-Line Log
 
 ```bash
 git log --oneline
 ```
 
-### Show differences between commits
+### 🔹 Show Differences Between Commits
 
 ```bash
 git diff
 ```
 
-### Show differences for a specific file
+### 🔹 Show Differences for a Specific File
 
 ```bash
 git diff <file-path>
@@ -164,27 +166,27 @@ git diff <file-path>
 
 ---
 
-## 6️⃣ Collaborating with GitHub / GitLab
+## 🤝 6️⃣ Collaborating with GitHub / GitLab
 
-### Clone a repository
+### 🔹 Clone a Repository
 
 ```bash
 git clone <repo-url>
 ```
 
-### Add a remote
+### 🔹 Add a Remote
 
 ```bash
 git remote add origin <repo-url>
 ```
 
-### Show remote repositories
+### 🔹 View Remotes
 
 ```bash
 git remote -v
 ```
 
-### Fetch remote changes without merging
+### 🔹 Fetch Remote Changes (without merging)
 
 ```bash
 git fetch
@@ -192,40 +194,54 @@ git fetch
 
 ---
 
-## 7️⃣ Useful Tips & Best Practices
+## 💡 7️⃣ Best Practices & Pro Tips
 
-- Write **clear commit messages**: `feat: add login button` or `fix: correct date formatting`
-- Use **feature branches** for new features
-- Regularly **pull changes** before starting work
-- Avoid committing **node_modules** and large files
-- Use `.gitignore` to exclude unnecessary files
-- Combine `git diff` + `git log` to understand changes before pushing
-- Tag releases for version control:
+* 🧠 Write **clear, descriptive commit messages**
+  Example:
 
   ```bash
-  git tag v1.0.0
-  git push origin v1.0.0
+  feat: add login functionality
+  fix: correct API endpoint path
   ```
+* 🌿 Use **feature branches** for new development
+* 🔄 Always **pull latest changes** before pushing
+* 🚫 Avoid committing `node_modules` or large binary files
+* 🧱 Use `.gitignore` to exclude unnecessary files
+* 🕵️ Check changes with `git diff` before committing
+* 🏷️ Tag releases for version tracking:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ---
 
-## 8️⃣ GUI Tools for Git
+## 🧭 8️⃣ GUI Tools for Git
 
-- [GitKraken](https://www.gitkraken.com/) – modern Git GUI
-- [SourceTree](https://www.sourcetreeapp.com/) – free Git GUI
-- [GitHub Desktop](https://desktop.github.com/) – GitHub integration
-- [VS Code Git Extension](https://code.visualstudio.com/docs/editor/versioncontrol) – built-in Git support
-
----
-
-## 9️⃣ Learning Resources & References
-
-- [Official Git Documentation](https://git-scm.com/doc)
-- [GitHub Docs](https://docs.github.com/en)
-- [Git Cheatsheet](https://education.github.com/git-cheat-sheet-education.pdf)
-- [Atlassian Git Tutorials](https://www.atlassian.com/git/tutorials)
-- [Pro Git Book (free)](https://git-scm.com/book/en/v2)
+| Tool                                                                        | Description                               |
+| --------------------------------------------------------------------------- | ----------------------------------------- |
+| [**GitKraken**](https://www.gitkraken.com/)                                 | Modern Git GUI with visual commit history |
+| [**SourceTree**](https://www.sourcetreeapp.com/)                            | Free Git GUI from Atlassian               |
+| [**GitHub Desktop**](https://desktop.github.com/)                           | Official GitHub GUI client                |
+| [**VS Code Git**](https://code.visualstudio.com/docs/editor/versioncontrol) | Built-in Git integration                  |
 
 ---
 
-> Git is a powerful tool — mastering it improves your workflow, reduces errors, and makes collaboration much smoother.
+## 🔗 9️⃣ Learning Resources
+
+* [📘 Official Git Documentation](https://git-scm.com/doc)
+* [🐙 GitHub Docs](https://docs.github.com/en)
+* [📄 Git Cheat Sheet (PDF)](https://education.github.com/git-cheat-sheet-education.pdf)
+* [🏗️ Atlassian Git Tutorials](https://www.atlassian.com/git/tutorials)
+* [📚 Pro Git Book (Free)](https://git-scm.com/book/en/v2)
+
+---
+
+✅ **Summary**
+
+> Git is the backbone of version control.
+> Mastering commands like **branching**, **merging**, **stashing**, and **resetting**
+> will streamline your workflow and keep your project history clean and professional.
+
+
