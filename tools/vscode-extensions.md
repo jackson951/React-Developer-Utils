@@ -1,4 +1,3 @@
-```markdown
 # Recommended VS Code Extensions for React Developers
 
 A curated list of **VS Code extensions** that improve productivity, code quality, and developer experience for React, TypeScript, Next.js, and frontend development.
