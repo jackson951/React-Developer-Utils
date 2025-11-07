@@ -1,5 +1,3 @@
----
-
 # 🧠 `context.md`
 
 _Understanding `useContext` — power, pitfalls, and 2025 best practices._
@@ -217,5 +215,3 @@ export default function UserProfile() {
 > 💡 **Final Thought**:  
 > _“Context is a tool, not a solution. Use it to remove friction — not to hide complexity.”_  
 > — Adapted from Kent C. Dodds
-
-
