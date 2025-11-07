@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/fundamentals/rendering.md`
 
-````markdown
 # 🖼️ Rendering in React
 
 > Rendering is how React converts your **components and state** into UI elements on the screen.  
