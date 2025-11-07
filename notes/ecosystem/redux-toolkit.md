@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/ecosystem/redux-toolkit.md`
 
-````markdown
 # 🧠 Redux Toolkit (RTK) — Complete Guide
 
 > Redux Toolkit (RTK) is the official, recommended way to write Redux logic — cleaner, faster, and with less boilerplate.
