@@ -1,5 +1,3 @@
-### 📘 **File:** `notes/fundamentals/components.md`
-
 # 🧱 React Components — Complete Guide
 
 > Components are the building blocks of any React application. They are reusable, composable, and define the UI structure and behavior.
@@ -10,7 +8,7 @@
 
 A **React component** is a JavaScript (or TypeScript) function or class that returns JSX.
 
-- **Function Component** (Recommended)
+**Function Component** (Recommended):
 
 ```jsx
 function Button({ label, onClick }) {
@@ -22,9 +20,8 @@ const Button = ({ label, onClick }) => (
   <button onClick={onClick}>{label}</button>
 );
 ```
-````
 
-- **Class Component** (Legacy, less used)
+**Class Component** (Legacy, less used):
 
 ```jsx
 import React, { Component } from "react";
@@ -102,8 +99,8 @@ function Counter() {
 }
 ```
 
-- `useState(initialValue)` returns `[state, setState]`.
-- Each state change triggers a **re-render**.
+- `useState(initialValue)` returns `[state, setState]`
+- Each state change triggers a **re-render**
 
 ---
 
@@ -281,14 +278,14 @@ const Button = memo(({ label }) => <button>{label}</button>);
 
 ## 🧭 12. Best Practices
 
-- Keep components **small & focused**
-- Prefer **function components with hooks**
-- Avoid deep prop drilling (use context or state libraries)
-- Use **PropTypes or TypeScript** for type safety
-- Split large UI into reusable components
-- Follow **composition over inheritance**
-- Name files after component (`Button.jsx`, `Card.jsx`)
-- Use `index.js` for **barrel exports**:
+✅ Keep components **small & focused**  
+✅ Prefer **function components with hooks**  
+✅ Avoid deep prop drilling (use context or state libraries)  
+✅ Use **PropTypes or TypeScript** for type safety  
+✅ Split large UI into reusable components  
+✅ Follow **composition over inheritance**  
+✅ Name files after component (`Button.jsx`, `Card.jsx`)  
+✅ Use `index.js` for **barrel exports**:
 
 ```js
 export { default as Button } from "./Button";
@@ -307,8 +304,9 @@ export { default as Card } from "./Card";
 
 ---
 
-✅ **Summary**
+## ✅ Summary
 
-> Components are the building blocks of React.
-> Learn to handle **props, state, events, and lifecycle** efficiently.
+> Components are the building blocks of React.  
+> Learn to handle **props, state, events, and lifecycle** efficiently.  
 > Use **composition, memoization, and controlled components** for scalable, maintainable code.
+
