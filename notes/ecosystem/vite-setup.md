@@ -1,10 +1,5 @@
-Absolutely, Jackson ⚡ — here’s a **complete `vite-setup.md`** for your **React Developer Utils** repo. It’s structured as a practical, all-in-one reference for setting up **Vite** with React, TypeScript, Tailwind, and common dev tools.
-
----
-
 ### 📘 **File:** `notes/ecosystem/vite-setup.md`
 
-````markdown
 # ⚡ Vite Setup for React Projects
 
 > Vite is a fast, modern build tool for frontend projects.  
