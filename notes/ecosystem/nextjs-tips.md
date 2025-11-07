@@ -300,6 +300,4 @@ npm start
 > Next.js combines the best of React, SSR, and static generation — ideal for fast, SEO-friendly web apps.
 > Master layouts, data fetching, and optimization early to scale your projects cleanly.
 
-```
 
-```
