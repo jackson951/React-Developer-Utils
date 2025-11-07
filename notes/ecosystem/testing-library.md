@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/ecosystem/testing-library.md`
 
-````markdown
 # 🧪 React Testing Library (RTL) — Complete Guide
 
 > **React Testing Library (RTL)** focuses on testing components the way users interact with them — not implementation details.
