@@ -1,6 +1,4 @@
 ### 📘 **File:** `notes/fundamentals/lifecycle.md`
-
-````markdown
 # 🔄 React Component Lifecycle
 
 > React components go through **lifecycle stages**: Mounting, Updating, and Unmounting.  
