@@ -1,21 +1,23 @@
-# Lint-Staged Setup
+### 📘 **File:** `notes/fundamentals/lint-staged-setup.md`
 
-**Lint-Staged** lets you run scripts **only on staged files** in Git, making pre-commit checks faster and more efficient. Typically used with **ESLint, Prettier, or tests**.
+# 🧹 Lint-Staged Setup
+
+> **Lint-Staged** lets you run scripts **only on staged files** before committing.
+> It’s typically used with **ESLint, Prettier**, or **tests** to ensure your code is clean — fast.
 
 ---
 
-## 1️⃣ Install Lint-Staged
+## ⚙️ 1️⃣ Install Lint-Staged
 
 ```bash
 npm install --save-dev lint-staged
 ```
-````
 
 ---
 
-## 2️⃣ Add Configuration
+## 🧩 2️⃣ Add Configuration
 
-You can configure **lint-staged** in `package.json`:
+You can define your configuration directly in `package.json`:
 
 ```json
 {
@@ -26,13 +28,16 @@ You can configure **lint-staged** in `package.json`:
 }
 ```
 
-> ✅ This runs **ESLint and Prettier** on staged JS/TS files and Prettier on CSS/SCSS/Markdown/JSON files.
+✅ **Explanation:**
+
+* Runs **ESLint + Prettier** on all staged JS/TS files
+* Runs **Prettier** on CSS, SCSS, Markdown, and JSON files
 
 ---
 
-### Alternative: Separate Config File
+### 📂 Alternative: Separate Config File
 
-Create a `lint-staged.config.js`:
+Create a `lint-staged.config.js` in your project root:
 
 ```js
 module.exports = {
@@ -41,56 +46,71 @@ module.exports = {
 };
 ```
 
+> 💡 Use this if you prefer keeping your `package.json` clean or need advanced customization.
+
 ---
 
-## 3️⃣ Integrate with Husky
+## 🪄 3️⃣ Integrate with Husky
 
-Add a **pre-commit hook**:
+Add a **pre-commit hook** using Husky:
 
 ```bash
 npx husky add .husky/pre-commit "npx lint-staged"
 ```
 
-- Husky triggers the **lint-staged** script on each commit.
-- Only staged files are checked and auto-fixed.
+* Husky triggers **Lint-Staged** on each commit.
+* Only **staged files** are linted and formatted.
+* Prevents unformatted or broken code from being committed.
 
 ---
 
-## 4️⃣ Example Workflow
+## 🔁 4️⃣ Example Workflow
 
-1. Make changes to files in your project.
-2. Stage files: `git add .`
-3. Commit: `git commit -m "feat: add button component"`
-4. **Lint-staged** auto-runs ESLint and Prettier on staged files.
-5. Commit completes only if all scripts pass.
+1. Modify files in your project
+2. Stage files:
 
----
+   ```bash
+   git add .
+   ```
+3. Commit changes:
 
-## 5️⃣ Useful Tips
-
-- Combine with **pre-push hook** to run tests:
-
-```bash
-npx husky add .husky/pre-push "npm test"
-```
-
-- Run **lint-staged manually** anytime:
-
-```bash
-npx lint-staged
-```
-
-- Ensure your **VS Code Prettier settings** match lint-staged rules to avoid conflicts.
+   ```bash
+   git commit -m "feat: add button component"
+   ```
+4. Lint-Staged runs ESLint + Prettier on staged files
+5. Commit completes only if all checks pass ✅
 
 ---
 
-## 6️⃣ Useful Links
+## 💡 5️⃣ Extra Tips
 
-- [Lint-Staged GitHub](https://github.com/okonet/lint-staged)
-- [Husky + Lint-Staged Guide](https://typicode.github.io/husky/#/?id=lint-staged)
-- [ESLint Docs](https://eslint.org/docs/user-guide/getting-started)
-- [Prettier Docs](https://prettier.io/docs/en/index.html)
+* Run tests automatically before pushing:
+
+  ```bash
+  npx husky add .husky/pre-push "npm test"
+  ```
+
+* Run Lint-Staged manually anytime:
+
+  ```bash
+  npx lint-staged
+  ```
+
+* Make sure your **VS Code Prettier settings** align with your project’s `.prettierrc`
+  to avoid inconsistent formatting.
 
 ---
 
-> 💡 Tip: Lint-Staged + Husky ensures **clean, consistent code** in your repo and prevents bad commits.
+## 📚 6️⃣ Useful Resources
+
+* [🧹 Lint-Staged GitHub](https://github.com/okonet/lint-staged)
+* [🐶 Husky + Lint-Staged Docs](https://typicode.github.io/husky/#/?id=lint-staged)
+* [🧩 ESLint Documentation](https://eslint.org/docs/user-guide/getting-started)
+* [🎨 Prettier Documentation](https://prettier.io/docs/en/index.html)
+
+---
+
+> 💡 **Pro Tip:**
+> Combine **Lint-Staged + Husky + ESLint + Prettier** for an automated,
+> reliable workflow that **keeps your commits clean and consistent**.
+
