@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/fundamentals/props-and-state.md`
 
-````markdown
 # 🧩 Props & State in React
 
 > Props and state are the two core ways to manage data in React components.  
