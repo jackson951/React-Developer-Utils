@@ -1,5 +1,3 @@
-### 📘 **File:** `notes/ecosystem/testing-library.md`
-
 # 🧪 React Testing Library (RTL) — Complete Guide
 
 > **React Testing Library (RTL)** focuses on testing components the way users interact with them — not implementation details.
@@ -11,7 +9,6 @@
 ```bash
 npm install --save-dev @testing-library/react @testing-library/jest-dom @testing-library/user-event jest
 ```
-````
 
 For **Vite** projects:
 
@@ -19,7 +16,7 @@ For **Vite** projects:
 npm install --save-dev vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event
 ```
 
-If you’re using **TypeScript**:
+If you're using **TypeScript**:
 
 ```bash
 npm install --save-dev @types/jest @types/testing-library__jest-dom
@@ -89,10 +86,9 @@ test("increments counter when button clicked", async () => {
 ```
 
 ✅ **What happened?**
-
-- `render()` mounts your component in a virtual DOM.
-- `screen` queries elements the way users see them.
-- `userEvent` simulates real interactions (click, type, tab, etc).
+- `render()` mounts your component in a virtual DOM
+- `screen` queries elements the way users see them
+- `userEvent` simulates real interactions (click, type, tab, etc)
 
 ---
 
@@ -371,14 +367,14 @@ src/
 
 ## 💡 12. Best Practices
 
-✅ Test behavior, not implementation
-✅ Use `getByRole` over `getByTestId`
-✅ Prefer **userEvent** over `fireEvent`
-✅ Keep tests small and focused
-✅ Name test files as `<Component>.test.jsx`
-✅ Don’t test 3rd-party libraries (mock them)
-✅ Don’t use snapshot testing for dynamic UI
-✅ Use `await screen.findBy...` for async rendering
+✅ Test behavior, not implementation  
+✅ Use `getByRole` over `getByTestId`  
+✅ Prefer **userEvent** over `fireEvent`  
+✅ Keep tests small and focused  
+✅ Name test files as `<Component>.test.jsx`  
+✅ Don't test 3rd-party libraries (mock them)  
+✅ Don't use snapshot testing for dynamic UI  
+✅ Use `await screen.findBy...` for async rendering  
 
 ---
 
@@ -428,8 +424,9 @@ npm test
 
 ---
 
-✅ **Summary**
+## ✅ Summary
 
-> Test your React components the way users use them — not how they’re built.
-> Use **React Testing Library** for accessibility-first, maintainable tests.
+> Test your React components the way users use them — not how they're built.  
+> Use **React Testing Library** for accessibility-first, maintainable tests.  
 > Combine it with **MSW** and **Vitest/Jest** for a production-grade test setup.
+
