@@ -1,6 +1,3 @@
-### 📘 **File:** `notes/ecosystem/zustand.md`
-
-
 # 🧩 Zustand — Complete Guide for React State Management
 
 > Zustand is a small, fast, and scalable state management library for React.  
@@ -13,7 +10,6 @@
 ```bash
 npm install zustand
 ```
-````
 
 Optional for **middleware features**:
 
@@ -229,13 +225,13 @@ export const useThemeStore = create(
 
 ## 🧭 9. Best Practices
 
-- Use **selectors** to prevent unnecessary re-renders
-- Split large stores into **feature-based slices**
-- Persist only **critical state** (like theme or auth token)
-- Combine with **React Query** for async server state
-- Avoid storing derived state — compute it in components
-- Use **middleware** for devtools and persistence
-- Keep store functions small and pure
+✅ Use **selectors** to prevent unnecessary re-renders  
+✅ Split large stores into **feature-based slices**  
+✅ Persist only **critical state** (like theme or auth token)  
+✅ Combine with **React Query** for async server state  
+✅ Avoid storing derived state — compute it in components  
+✅ Use **middleware** for devtools and persistence  
+✅ Keep store functions small and pure  
 
 ---
 
@@ -248,8 +244,9 @@ export const useThemeStore = create(
 
 ---
 
-✅ **Summary**
+## ✅ Summary
 
-> Zustand = lightweight, scalable state management.
-> Perfect for **global UI state** and **small apps**, while **React Query** handles server state.
+> Zustand = lightweight, scalable state management.  
+> Perfect for **global UI state** and **small apps**, while **React Query** handles server state.  
 > Simple API, minimal boilerplate, and excellent TypeScript support.
+
