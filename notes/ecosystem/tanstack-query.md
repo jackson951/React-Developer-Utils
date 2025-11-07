@@ -1,6 +1,3 @@
-### 📘 **File:** `notes/ecosystem/tanstack-query.md`
-
-
 # ⚡ TanStack Query (React Query) — Ultimate Guide
 
 > TanStack Query (formerly React Query) is a powerful data-fetching and state management library for React that makes server-state management effortless.
@@ -13,7 +10,6 @@
 npm install @tanstack/react-query
 npm install axios
 ```
-````
 
 Optional Devtools:
 
@@ -82,7 +78,6 @@ export default function UsersList() {
 ```
 
 ✅ **Features:**
-
 - Automatic caching
 - Stale-while-revalidate
 - Refetch on focus/reconnect
@@ -137,7 +132,6 @@ export default function AddUser() {
 ```
 
 ✅ **Mutation Lifecycle:**
-
 - `onMutate` → Optimistic update
 - `onError` → Rollback
 - `onSuccess` → Invalidate cache
@@ -147,25 +141,21 @@ export default function AddUser() {
 ## ♻️ 6. Cache & Invalidation
 
 ### Invalidate:
-
 ```js
 queryClient.invalidateQueries(["users"]);
 ```
 
 ### Refetch manually:
-
 ```js
 queryClient.refetchQueries(["users"]);
 ```
 
 ### Remove cache:
-
 ```js
 queryClient.removeQueries(["users"]);
 ```
 
 ### Prefetch (for next route):
-
 ```js
 queryClient.prefetchQuery({
   queryKey: ["posts"],
@@ -337,11 +327,11 @@ const queryClient = new QueryClient({
 
 ## 💡 13. Common Patterns
 
-✅ Prefetch data on route hover
-✅ Use `enabled: false` for conditional fetching
-✅ Use query keys consistently
-✅ Separate query functions into `api/` folder
-✅ Combine React Query with **Zustand or Context** for local state
+✅ Prefetch data on route hover  
+✅ Use `enabled: false` for conditional fetching  
+✅ Use query keys consistently  
+✅ Separate query functions into `api/` folder  
+✅ Combine React Query with **Zustand or Context** for local state  
 
 ---
 
@@ -374,12 +364,12 @@ src/
 
 ## 🧭 16. Best Practices
 
-✅ Always use **unique and descriptive** query keys
-✅ **Group queries** logically (`["todos", userId]`)
-✅ **Invalidate** only necessary queries after mutations
-✅ Use **`staleTime`** wisely to balance freshness vs performance
-✅ Avoid `useEffect` for fetching — use `useQuery` instead
-✅ Use **Devtools** in development for debugging
+✅ Always use **unique and descriptive** query keys  
+✅ **Group queries** logically (`["todos", userId]`)  
+✅ **Invalidate** only necessary queries after mutations  
+✅ Use **`staleTime`** wisely to balance freshness vs performance  
+✅ Avoid `useEffect` for fetching — use `useQuery` instead  
+✅ Use **Devtools** in development for debugging  
 
 ---
 
@@ -393,8 +383,9 @@ src/
 
 ---
 
-✅ **Summary**
+## ✅ Summary
 
-> TanStack Query = effortless server state.
-> Fetch, cache, and sync your backend with React — without Redux or context bloat.
+> TanStack Query = effortless server state.  
+> Fetch, cache, and sync your backend with React — without Redux or context bloat.  
 > Perfect for scalable, production-ready React apps.
+
