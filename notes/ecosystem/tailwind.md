@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/ecosystem/tailwind.md`
 
-````markdown
 # 🎨 Tailwind CSS — Complete Guide for React Developers
 
 > Tailwind CSS is a utility-first CSS framework for building modern, responsive UIs quickly and consistently.
