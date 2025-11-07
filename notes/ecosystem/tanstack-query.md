@@ -1,6 +1,6 @@
 ### 📘 **File:** `notes/ecosystem/tanstack-query.md`
 
-````markdown
+
 # ⚡ TanStack Query (React Query) — Ultimate Guide
 
 > TanStack Query (formerly React Query) is a powerful data-fetching and state management library for React that makes server-state management effortless.
