@@ -1,4 +1,3 @@
-````markdown
 # Husky Setup for Git Hooks
 
 Husky allows you to **run scripts automatically on Git hooks**, like `pre-commit` or `pre-push`. This is useful to **lint, format, and test code** before committing.
