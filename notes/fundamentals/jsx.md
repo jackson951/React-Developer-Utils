@@ -1,6 +1,5 @@
 ### 📘 **File:** `notes/fundamentals/jsx.md`
 
-````markdown
 # ✨ JSX — JavaScript XML in React
 
 > JSX is a syntax extension for JavaScript. It allows writing **HTML-like code** inside JavaScript and is transformed to `React.createElement` calls by Babel.
