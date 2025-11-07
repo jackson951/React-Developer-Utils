@@ -11,9 +11,8 @@
 ```jsx
 const element = <h1>Hello, world!</h1>;
 ```
-````
 
-- JSX must have a **single parent element**:
+* JSX must have a **single parent element**:
 
 ```jsx
 const element = (
@@ -24,7 +23,7 @@ const element = (
 );
 ```
 
-- Use **Fragments** to avoid extra DOM nodes:
+* Use **Fragments** to avoid extra DOM nodes:
 
 ```jsx
 const element = (
@@ -46,14 +45,14 @@ const name = "Jackson";
 const element = <h1>Hello, {name}!</h1>;
 ```
 
-- You can use any valid JS expression:
+* You can use any valid JS expression:
 
 ```jsx
 const x = 5;
 const element = <p>{x + 10}</p>;
 ```
 
-- Conditional rendering:
+* Conditional rendering:
 
 ```jsx
 const isLoggedIn = true;
@@ -64,7 +63,7 @@ const greeting = <p>{isLoggedIn ? "Welcome!" : "Please log in"}</p>;
 
 ## 🧩 3. Attributes in JSX
 
-- JSX uses **camelCase** for HTML attributes:
+* JSX uses **camelCase** for HTML attributes:
 
 ```jsx
 <img src="logo.png" alt="Logo" />
@@ -72,13 +71,13 @@ const greeting = <p>{isLoggedIn ? "Welcome!" : "Please log in"}</p>;
 <button className="btn">Click</button>
 ```
 
-- Boolean attributes:
+* Boolean attributes:
 
 ```jsx
 <input type="checkbox" checked={true} />
 ```
 
-- Spread props:
+* Spread props:
 
 ```jsx
 const props = { type: "text", placeholder: "Enter name" };
@@ -102,13 +101,13 @@ function Card({ children }) {
 </Card>;
 ```
 
-- `children` can be **string, number, element, array of elements**.
+* `children` can be **string, number, element, or array of elements**.
 
 ---
 
 ## 🔄 5. JSX is an Expression
 
-- JSX can be stored in variables, passed as arguments, or returned from functions:
+* JSX can be stored in variables, passed as arguments, or returned from functions:
 
 ```jsx
 const title = <h1>Hello JSX</h1>;
@@ -124,7 +123,7 @@ const element = <div>{renderTitle()}</div>;
 
 ## 🧪 6. Comments in JSX
 
-- Single-line:
+* Single-line:
 
 ```jsx
 {
@@ -132,14 +131,14 @@ const element = <div>{renderTitle()}</div>;
 }
 ```
 
-- Multi-line:
+* Multi-line:
 
 ```jsx
 {
   /*
-  This is a 
-  multi-line comment
-*/
+    This is a 
+    multi-line comment
+  */
 }
 ```
 
@@ -166,39 +165,37 @@ const list = (
 
 ## 🧱 8. Conditional Rendering
 
-- **Ternary Operator:**
+* **Ternary Operator:**
 
 ```jsx
 const isOnline = true;
 <p>{isOnline ? "Online" : "Offline"}</p>;
 ```
 
-- **Short-circuit Operator:**
+* **Short-circuit Operator:**
 
 ```jsx
-{
-  isOnline && <p>User is online</p>;
-}
+{isOnline && <p>User is online</p>}
 ```
 
 ---
 
 ## 🔧 9. Styling in JSX
 
-- **Inline styles** (camelCase):
+* **Inline styles** (camelCase):
 
 ```jsx
 const style = { color: "red", fontSize: "20px" };
 <p style={style}>Styled text</p>;
 ```
 
-- **Class name** uses `className` instead of `class`:
+* **Class name** uses `className` instead of `class`:
 
 ```jsx
-<div className="container">Content</div>
+<div className="container">Content</div>;
 ```
 
-- **Dynamic classes**:
+* **Dynamic classes**:
 
 ```jsx
 const isActive = true;
@@ -218,7 +215,7 @@ const isActive = true;
 | maxlength   | maxLength       |
 | style="..." | style={{ ... }} |
 
-- **Self-closing tags are required**:
+* **Self-closing tags are required:**
 
 ```jsx
 <img src="logo.png" alt="Logo" />
@@ -230,21 +227,21 @@ const isActive = true;
 
 ## 💡 11. Best Practices
 
-- Always **wrap adjacent JSX** in a single parent or fragment
-- Use **camelCase** for attributes
-- Use **curly braces `{}`** for dynamic expressions
-- Provide **unique keys** for lists
-- Keep JSX **readable** and break into smaller components
-- Avoid inline functions in render for heavy components (performance tip)
+* Always **wrap adjacent JSX** in a single parent or fragment
+* Use **camelCase** for attributes
+* Use **curly braces `{}`** for dynamic expressions
+* Provide **unique keys** for lists
+* Keep JSX **readable** and break into smaller components
+* Avoid inline functions in render for heavy components (performance tip)
 
 ---
 
 ## 🔗 12. Resources
 
-- [React Docs – JSX](https://reactjs.org/docs/introducing-jsx.html)
-- [React Docs – Rendering Elements](https://reactjs.org/docs/rendering-elements.html)
-- [React Docs – Lists and Keys](https://reactjs.org/docs/lists-and-keys.html)
-- [React JSX FAQ](https://reactjs.org/docs/faq-internals.html)
+* [React Docs – JSX](https://reactjs.org/docs/introducing-jsx.html)
+* [React Docs – Rendering Elements](https://reactjs.org/docs/rendering-elements.html)
+* [React Docs – Lists and Keys](https://reactjs.org/docs/lists-and-keys.html)
+* [React JSX FAQ](https://reactjs.org/docs/faq-internals.html)
 
 ---
 
@@ -252,3 +249,5 @@ const isActive = true;
 
 > JSX allows you to write HTML-like syntax inside JavaScript, making React development intuitive and expressive.
 > Remember: JSX is **just syntactic sugar** for `React.createElement()`.
+
+
