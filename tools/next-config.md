@@ -1,4 +1,3 @@
-````markdown
 # Next.js Configuration (`next.config.js` / `next.config.mjs`)
 
 Next.js uses a configuration file to customize the build, runtime, and development behavior of your project. This file is usually named:
