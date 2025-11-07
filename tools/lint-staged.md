@@ -1,4 +1,3 @@
-````markdown
 # Lint-Staged Setup
 
 **Lint-Staged** lets you run scripts **only on staged files** in Git, making pre-commit checks faster and more efficient. Typically used with **ESLint, Prettier, or tests**.
