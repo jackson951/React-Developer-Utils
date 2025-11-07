@@ -1,44 +1,41 @@
-# CLI Commands for React / Next.js / Vite Projects
+### 📘 **File:** `notes/fundamentals/cli-commands.md`
 
-This guide provides commonly used command-line interface (CLI) commands for React, Next.js, Vite, Git, Node.js, and general development workflows.
+# ⚙️ CLI Commands for React / Next.js / Vite Projects
+
+> A quick reference guide for commonly used **CLI commands** across
+> React, Next.js, Vite, Node.js, and Git development workflows.
 
 ---
 
-## 1️⃣ Node & npm
+## 🧩 1️⃣ Node & npm
 
-### Check Node.js version
+### 🔍 Check Versions
 
 ```bash
 node -v
-```
-````
-
-### Check npm version
-
-```bash
 npm -v
 ```
 
-### Initialize a new project
+### 📦 Initialize a New Project
 
 ```bash
 npm init -y
 ```
 
-### Install dependencies
+### 📥 Install Dependencies
 
 ```bash
 npm install <package-name>
 npm install --save-dev <dev-package-name>
 ```
 
-### Remove a package
+### 🗑️ Remove a Package
 
 ```bash
 npm uninstall <package-name>
 ```
 
-### Run scripts from package.json
+### ▶️ Run Scripts from package.json
 
 ```bash
 npm run <script-name>
@@ -46,9 +43,9 @@ npm run <script-name>
 
 ---
 
-## 2️⃣ Vite Commands
+## ⚡ 2️⃣ Vite Commands
 
-### Create a new Vite + React project
+### 🆕 Create a New Vite + React Project
 
 ```bash
 npm create vite@latest my-app -- --template react
@@ -56,19 +53,19 @@ cd my-app
 npm install
 ```
 
-### Start development server
+### 🚀 Start Development Server
 
 ```bash
 npm run dev
 ```
 
-### Build for production
+### 🏗️ Build for Production
 
 ```bash
 npm run build
 ```
 
-### Preview production build
+### 👀 Preview Production Build
 
 ```bash
 npm run preview
@@ -76,9 +73,9 @@ npm run preview
 
 ---
 
-## 3️⃣ Next.js Commands
+## 🌐 3️⃣ Next.js Commands
 
-### Create a new Next.js app
+### 🆕 Create a New Next.js App
 
 ```bash
 npx create-next-app@latest my-next-app
@@ -86,25 +83,25 @@ cd my-next-app
 npm install
 ```
 
-### Run development server
+### 🚀 Run Development Server
 
 ```bash
 npm run dev
 ```
 
-### Build production version
+### 🏗️ Build for Production
 
 ```bash
 npm run build
 ```
 
-### Start production server
+### ▶️ Start Production Server
 
 ```bash
 npm start
 ```
 
-### Lint code
+### 🧹 Lint Your Code
 
 ```bash
 npm run lint
@@ -112,70 +109,70 @@ npm run lint
 
 ---
 
-## 4️⃣ Git Commands
+## 🔧 4️⃣ Git Commands
 
-### Initialize repository
+### 🏁 Initialize Repository
 
 ```bash
 git init
 ```
 
-### Add files to staging
+### ➕ Add Files to Staging
 
 ```bash
 git add .
 ```
 
-### Commit changes
+### 💾 Commit Changes
 
 ```bash
 git commit -m "Commit message"
 ```
 
-### Check status
+### 🔎 Check Status
 
 ```bash
 git status
 ```
 
-### Push to remote repository
+### 📤 Push to Remote Repository
 
 ```bash
 git push origin main
 ```
 
-### Pull latest changes
+### 📥 Pull Latest Changes
 
 ```bash
 git pull origin main
 ```
 
-### Branching
+### 🌿 Branching
 
 ```bash
-git branch          # list branches
-git branch <name>   # create branch
-git checkout <name> # switch branch
-git merge <name>    # merge branch
+git branch           # list branches
+git branch <name>    # create branch
+git checkout <name>  # switch branch
+git merge <name>     # merge branch
 ```
 
 ---
 
-## 5️⃣ Running React Scripts
+## ⚙️ 5️⃣ Running React Scripts
 
-- **Start development server**
+### 🚀 Start Development Server
 
 ```bash
 npm start
 ```
 
-- **Build for production**
+### 🏗️ Build for Production
 
 ```bash
 npm run build
 ```
 
-- **Run tests**
+### 🧪 Run Tests
 
 ```bash
 npm test
@@ -183,40 +180,40 @@ npm test
 
 ---
 
-## 6️⃣ Misc Useful CLI Commands
+## 🧰 6️⃣ Miscellaneous Useful CLI Commands
 
-### Clear npm cache
+### 🧹 Clear npm Cache
 
 ```bash
 npm cache clean --force
 ```
 
-### Remove node_modules and reinstall
+### 🔄 Reinstall Dependencies
 
 ```bash
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Open VS Code in current folder
+### 💻 Open VS Code in Current Folder
 
 ```bash
 code .
 ```
 
-### Check for outdated packages
+### 📦 Check for Outdated Packages
 
 ```bash
 npm outdated
 ```
 
-### Install missing peer dependencies
+### 🔧 Install Missing Peer Dependencies
 
 ```bash
 npx install-peerdeps <package-name>
 ```
 
-### Run a specific script
+### ▶️ Run a Specific Script via npx
 
 ```bash
 npx <script-name>
@@ -224,21 +221,21 @@ npx <script-name>
 
 ---
 
-## 7️⃣ JSON & Environment Helpers
+## 🧾 7️⃣ JSON & Environment Helpers
 
-### Validate package.json
+### ✅ Validate package.json (via lint)
 
 ```bash
 npm run lint
 ```
 
-### Validate JSON file syntax
+### 🧠 Validate JSON File Syntax
 
 ```bash
 jq . <filename>.json
 ```
 
-### Load environment variables
+### 🌱 Load Environment Variables
 
 ```bash
 source .env
@@ -246,13 +243,19 @@ source .env
 
 ---
 
-## 8️⃣ Helpful Tips
+## 💡 8️⃣ Helpful Tips
 
-- Use **tab completion** to avoid typing long paths.
-- Use **`--save-dev`** for dev dependencies (e.g., ESLint, Prettier).
-- Use **`npx`** to run CLI tools without installing globally.
-- Use **`Ctrl+C`** to stop running dev servers.
+* ✅ Use **tab completion** to avoid typing long paths
+* ⚙️ Use `--save-dev` for **dev dependencies** (e.g., ESLint, Prettier)
+* ⚡ Use **`npx`** to run CLI tools without global install
+* 🛑 Press **Ctrl + C** to stop dev servers
+* 📘 Keep this file handy — it’s your **daily CLI cheat sheet**
 
 ---
 
-> Keep this file handy! It’s your quick reference for day-to-day React/Next/Vite CLI commands.
+✅ **Summary**
+
+> Mastering CLI commands boosts your **workflow efficiency**.
+> From initializing projects to deployment, these commands cover the full **React, Next.js, and Vite** ecosystem.
+
+
