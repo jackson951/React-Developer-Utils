@@ -1,4 +1,3 @@
-````markdown
 # ESLint + Prettier Setup for React / Next.js / Vite
 
 This guide will help you set up **ESLint** and **Prettier** in your React, Next.js, or Vite project to ensure **consistent code formatting** and **linting rules**.
