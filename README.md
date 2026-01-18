@@ -149,11 +149,14 @@ Recommended workflow:
 
 ## References
 
-* React Official Documentation
-* Epic React
-* React Patterns
-* React Conf
-* Community RFCs and proposals
+* [React Official Documentation](https://react.dev)
+* [Epic React](https://epicreact.dev)
+* [React Patterns](https://reactpatterns.com)
+* [React Conf](https://conf.react.dev)
+* [React RFCs](https://github.com/reactjs/rfcs)
+* [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+* [Vite Documentation](https://vitejs.dev)
+* [Next.js Documentation](https://nextjs.org/docs)
 
 ---
 
