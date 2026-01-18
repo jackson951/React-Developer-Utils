@@ -1,222 +1,151 @@
-# 🧪 `atomic-design.md`
+# Atomic Design in React
 
-_Atomic Design in React: Principles, Practice, and Pragmatism (2025 Edition)_
+*Atomic Design: Principles, Practice, and Pragmatism (2025)*
 
-> ✅ **Last Updated**: November 7, 2025  
-> 📌 **TL;DR**:
->
-> - Atomic Design is a **methodology**, not a rigid dogma.
-> - Use it to **scale design systems**, not to over-engineer small apps.
-> - In 2025: Combine with **Component-Driven Development (Storybook)**, **TypeScript**, and **design tokens**.
-> - ⚠️ Avoid deep nesting — prefer _flat_, _feature-aligned_ structures for most teams.
+**Last updated:** November 7, 2025
+
+**Summary**
+
+* Atomic Design is a **methodology**, not a strict rule set.
+* It is most valuable for **scaling design systems** and shared UI libraries.
+* In modern React, it works best alongside **Component-Driven Development**, **TypeScript**, and **design tokens**.
+* Excessive nesting should be avoided; favor **flat, feature-aligned structures** when possible.
 
 ---
 
-## 🔬 What Is Atomic Design?
+## What Is Atomic Design?
 
-Coined by [Brad Frost](https://bradfrost.com/blog/post/atomic-web-design/), Atomic Design is a **hierarchical methodology** for building design systems:
+Atomic Design was introduced by Brad Frost as a way to think about user interfaces as a hierarchy of reusable parts.
 
 ```
 Atoms → Molecules → Organisms → Templates → Pages
 ```
 
-| Level         | Role                                        | React Analogy          | Example                                       |
-| ------------- | ------------------------------------------- | ---------------------- | --------------------------------------------- |
-| **Atoms**     | Smallest UI units (no children)             | Stateless primitives   | `<Button>`, `<Input>`, `<Icon>`               |
-| **Molecules** | Groups of atoms functioning together        | Composed atoms         | `<SearchBar>` (Input + Button), `<LoginForm>` |
-| **Organisms** | Complex sections (molecules + atoms)        | Feature sections       | `<Header>`, `<ProductCard>`, `<CommentFeed>`  |
-| **Templates** | Page _structure_ (wireframe + placeholders) | Layouts with slots     | `<ArticleTemplate>`, `<DashboardLayout>`      |
-| **Pages**     | Specific instances (real data)              | Route-level components | `<HomePage>`, `<ProductPage id="123">`        |
+| Level     | Purpose                 | React Interpretation     | Example                   |
+| --------- | ----------------------- | ------------------------ | ------------------------- |
+| Atoms     | Fundamental UI elements | Stateless primitives     | `Button`, `Input`, `Icon` |
+| Molecules | Simple compositions     | Combined atoms           | `SearchBar`, `FormField`  |
+| Organisms | Complex UI sections     | Feature-level components | `Header`, `ProductCard`   |
+| Templates | Structural layout       | Layout components        | `DashboardLayout`         |
+| Pages     | Concrete instances      | Route-level components   | `ProductPage`             |
 
-> 🌐 **Goal**: Build UIs like LEGO — consistent, reusable, scalable.
+The intent is to encourage consistency, reuse, and a shared vocabulary between design and engineering.
 
 ---
 
-## 🗂️ Practical Folder Structure (2025 React)
+## Practical Folder Structure
 
-> ✅ **Recommended for medium/large apps**  
-> ❌ Overkill for prototypes or small SPAs
+This structure is suitable for medium to large React applications with shared UI concerns.
 
 ```bash
 src/
 ├── components/
-│   ├── atoms/              # Low-level, unstyled, accessible primitives
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Icon.tsx
-│   │   └── index.ts        # Barrel export
-│   │
-│   ├── molecules/          # Reusable combos (no business logic)
-│   │   ├── SearchBar.tsx   # → <Input> + <Button>
-│   │   ├── Card.tsx        # → <div> + <Heading> + <Text>
-│   │   └── index.ts
-│   │
-│   ├── organisms/          # Feature-aware, may use hooks, context
-│   │   ├── Header.tsx      # → <Logo> + <Nav> + <SearchBar>
-│   │   ├── ProductGrid.tsx # → array of <ProductCard>
-│   │   └── index.ts
-│   │
-│   └── layouts/            # Templates (structural, not content-specific)
-│       ├── MainLayout.tsx  # → <Header> + <main>{children}</main> + <Footer>
-│       └── DashboardLayout.tsx
+│   ├── atoms/
+│   ├── molecules/
+│   ├── organisms/
+│   └── layouts/
 │
-├── features/               # Business logic + page assembly
+├── features/
 │   ├── product/
-│   │   ├── ui/             # Feature-local components (not global)
-│   │   │   ├── ProductDetails.tsx  # → uses organisms + molecules
-│   │   │   └── AddToCartButton.tsx
-│   │   └── ProductPage.tsx # ← Page (uses layout + feature UI)
-│   │
+│   │   ├── ui/
+│   │   └── ProductPage.tsx
 │   └── auth/
 │
 └── styles/
-    ├── tokens/             # Design tokens (colors, spacing, typography)
-    │   ├── colors.ts
-    │   ├── spacing.ts
-    │   └── typography.ts
-    └── theme.ts            # `ThemeProvider` config
+    ├── tokens/
+    └── theme.ts
 ```
 
-✅ **Key Decisions**:
+Key conventions:
 
-- `atoms/` are **unstyled** (accept `className`, `style`, or use design tokens)
-- `molecules/` and `organisms/` are **reusable across features**
-- Feature-specific components live in `features/X/ui/` — _not_ forced into organisms
-- Use **barrel files** (`index.ts`) for clean imports:
-  ```ts
-  // components/index.ts
-  export * from "./atoms";
-  export * from "./molecules";
-  export * from "./organisms";
-  ```
+* **Atoms** are presentational, accessible, and styling-agnostic.
+* **Molecules and organisms** are reusable across features.
+* Feature-specific UI lives close to its domain (`features/*/ui`).
+* Barrel exports are used to keep imports predictable.
 
 ---
 
-## 🛠️ Implementation Best Practices
+## Implementation Guidelines
 
-### ✅ Atoms: The Foundation
+### Atoms
 
-- **No business logic** — pure presentational
-- **Fully accessible** (ARIA, keyboard nav, focus management)
-- **TypeScript props** with strict interfaces:
-
-  ```tsx
-  // atoms/Button.tsx
-  type ButtonProps = {
-    variant?: "primary" | "secondary" | "outline";
-    size?: "sm" | "md" | "lg";
-    isLoading?: boolean;
-    children: React.ReactNode;
-    onClick?: () => void;
-  } & React.ButtonHTMLAttributes<HTMLButtonElement>;
-
-  export const Button = ({ variant = "primary", ...props }: ButtonProps) => (
-    <button
-      className={clsx(
-        "px-4 py-2 rounded",
-        variant === "primary" && "bg-blue-600 text-white"
-        // ...
-      )}
-      {...props}
-    />
-  );
-  ```
-
-### ✅ Molecules: Composition
-
-- **No data fetching** — props-in, JSX-out
-- **Test all variants** (e.g., `isLoading`, `error`)
-- Prefer **compound components** over fragile prop drilling:
-  ```tsx
-  // molecules/Card.tsx
-  <Card>
-    <Card.Header>...</Card.Header>
-    <Card.Body>...</Card.Body>
-    <Card.Footer>...</Card.Footer>
-  </Card>
-  ```
-
-### ✅ Organisms: Feature Integration
-
-- May use **context**, **hooks**, **global state**
-- Keep **data-fetching minimal** — better in Pages or Server Components
-- Avoid “god components” — split if >200 lines
-
----
-
-## ⚠️ When _Not_ to Use Atomic Design
-
-| Scenario                                | Better Approach                      |
-| --------------------------------------- | ------------------------------------ |
-| **Small app (<10 screens)**             | Flat `components/` + feature folders |
-| **Rapid prototyping**                   | Build pages first, refactor later    |
-| **Design-agnostic UI** (internal tools) | Skip atoms — start with molecules    |
-| **Heavy customization per client**      | Component-per-feature (no reuse)     |
-
-> 📝 **Brad Frost’s own advice (2023)**:  
-> _“Atomic Design is a tool — not a religion. Adapt it. Break the rules. Make it work for you.”_
-
----
-
-## 🧪 Atomic Design + Modern Tooling (2025)
-
-| Tool             | Role                                    | Integration                              |
-| ---------------- | --------------------------------------- | ---------------------------------------- |
-| **Storybook**    | Document & test components in isolation | Auto-generate stories for atoms → pages  |
-| **Chromatic**    | Visual regression testing               | Catch unintended UI changes              |
-| **Figma Tokens** | Sync design ↔ code                      | Export tokens as JSON → `styles/tokens/` |
-| **TypeScript**   | Enforce props contracts                 | `Props` interfaces in every component    |
-| **Playwright**   | E2E test user flows                     | `<Page>`-level tests in `tests/e2e/`     |
-
-**Example Storybook workflow**:
-
-```bash
-# Generate story for Button
-npx storybook@8 add-story components/atoms/Button.tsx
-```
-
-→ Creates `Button.stories.tsx` with variants (primary, disabled, loading).
-
----
-
-## 🌐 Atomic Design in the RSC Era
-
-### ✅ Server Components Fit Naturally
-
-- **Atoms/Molecules**: Often Server Components (static, no interactivity)
-- **Organisms/Pages**: May mix Server + Client Components
+* No business logic or side effects
+* Strong accessibility defaults
+* Strict TypeScript props
 
 ```tsx
-// organisms/Header.tsx (Server Component)
-export default function Header() {
-  const user = await getUser(); // ✅ Safe — runs on server
-  return (
-    <header>
-      <Logo />
-      <Nav />
-      {user ? <UserMenu user={user} /> : <LoginButton />} {/* Client */}
-    </header>
-  );
+type ButtonProps = {
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
+  isLoading?: boolean;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+export function Button({ variant = "primary", ...props }: ButtonProps) {
+  return <button {...props} />;
 }
 ```
 
-### ❌ Avoid Anti-Patterns
+### Molecules
 
-- Don’t force **all atoms** to be Client Components — most don’t need JS
-- Don’t put **Server-only logic** in `atoms/` — keep primitives framework-agnostic
+* Composed entirely from atoms
+* No data fetching
+* Designed for reuse and configurability
+
+Compound component patterns are often preferable to deeply nested props.
+
+### Organisms
+
+* May integrate hooks, context, or state
+* Should remain focused on a single responsibility
+* Split components that grow beyond reasonable size or complexity
+
+---
+
+## When Atomic Design Is Not a Good Fit
+
+| Scenario                     | Preferred Approach       |
+| ---------------------------- | ------------------------ |
+| Small applications           | Flat component structure |
+| Rapid prototyping            | Page-first development   |
+| Highly custom per-feature UI | Feature-local components |
+| Minimal design reuse         | Skip atom abstraction    |
+
+Atomic Design should be adapted, not enforced.
 
 ---
 
-## 📚 Recommended Reading
+## Atomic Design and Modern Tooling
 
-- 📘 [Atomic Design (Book) — Brad Frost](https://atomicdesign.bradfrost.com)
-- 🎨 [Design Systems Handbook — InVision](https://www.designbetter.co/design-systems-handbook)
-- 🧪 [Storybook: Component-Driven Development](https://storybook.js.org/docs/react/workflows/component-driven-development)
-- 📊 [When Atomic Design Goes Wrong (CSS Tricks)](https://css-tricks.com/when-atomic-design-goes-wrong/)
+| Tool          | Purpose              | Notes                                    |
+| ------------- | -------------------- | ---------------------------------------- |
+| Storybook     | Component isolation  | Works naturally with atoms and molecules |
+| Chromatic     | Visual regression    | Useful for shared design systems         |
+| Design tokens | Design consistency   | Sync design and code                     |
+| TypeScript    | Contract enforcement | Required at all levels                   |
+| Playwright    | End-to-end testing   | Focus on page-level behavior             |
+
+Storybook documentation: [https://storybook.js.org/docs/react](https://storybook.js.org/docs/react)
 
 ---
 
-> 💡 **Final Thought**:  
-> _“Atomic Design isn’t about naming folders — it’s about building a shared language between designers and developers. When your designer says ‘molecule’, your engineer knows exactly where to look.”_
+## Atomic Design and React Server Components
+
+Atomic Design maps cleanly to the Server Components model:
+
+* Atoms and molecules are often server-rendered and static
+* Organisms and pages may combine server and client components
+
+Avoid coupling atoms to framework-specific server logic to preserve reuse.
 
 ---
+
+## Further Reading
+
+* Atomic Design by Brad Frost: [https://atomicdesign.bradfrost.com](https://atomicdesign.bradfrost.com)
+* Brad Frost – Atomic Web Design article: [https://bradfrost.com/blog/post/atomic-web-design/](https://bradfrost.com/blog/post/atomic-web-design/)
+* Design Systems Handbook (InVision): [https://www.designbetter.co/design-systems-handbook](https://www.designbetter.co/design-systems-handbook)
+* When Atomic Design Goes Wrong (CSS-Tricks): [https://css-tricks.com/when-atomic-design-goes-wrong/](https://css-tricks.com/when-atomic-design-goes-wrong/)
+
+---
+
+Atomic Design is most effective when it provides shared language and structure without constraining delivery speed. Treat it as a guide, not a rulebook.
