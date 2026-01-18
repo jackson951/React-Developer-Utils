@@ -1,18 +1,13 @@
-```markdown
 # React Developer Utils
 
 <div align="center">
 
-**An internal-grade knowledge base and utility library for modern React development**
+**A curated React knowledge base, utilities library, and experimentation workspace**
 
 [![Last Updated](https://img.shields.io/badge/Updated-November%202025-blue.svg)](https://github.com/jackson951/react-developer-utils)
 [![React](https://img.shields.io/badge/React-19%2B-61dafb.svg?logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178c6.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-*A structured reference for building, maintaining, and scaling React applications.*
-
-[Quick Start](#quick-start) • [Project Structure](#project-structure) • [Usage](#usage) • [Contributing](#contributing)
 
 </div>
 
@@ -20,14 +15,16 @@
 
 ## Overview
 
-React Developer Utils is a curated repository designed to support professional React development in production environments.  
-It serves as a centralized reference for patterns, utilities, and architectural guidance aligned with modern React standards.
+**React Developer Utils** is a long-term, evolving repository designed to support professional React development.
 
-The repository is intended for:
-- Consistent onboarding of React developers
-- Faster delivery through reusable patterns
-- Shared understanding of architectural decisions
-- Reduced duplication of common solutions
+It consolidates:
+
+* Architectural notes and mental models
+* Reusable hooks, utilities, and UI primitives
+* Proven configuration patterns
+* A controlled playground for experimentation
+
+The goal is consistency, speed, and clarity when building and maintaining modern React applications.
 
 ---
 
@@ -35,87 +32,43 @@ The repository is intended for:
 
 This repository focuses on:
 
-- Core React concepts and mental models
-- Reusable hooks, utilities, and UI primitives
-- Framework-agnostic helpers
-- Tooling and configuration standards
-- Experimentation and validation in isolated playgrounds
-- Long-term skill development and reference material
+* Modern React (hooks-first, function components)
+* TypeScript-friendly patterns
+* Framework-aware but framework-agnostic utilities
+* Maintainable, production-oriented solutions
+
+It is not a tutorial project or starter template.
 
 ---
 
-## Project Structure
+## Repository Structure
 
 ```
-
 react-developer-utils/
 │
-├── notes/                    Conceptual documentation and guidance
-│   ├── fundamentals/         Core React concepts and rendering model
-│   ├── advanced/             Hooks, Context, Suspense, Error Boundaries
-│   ├── architecture/         Project structure and design principles
-│   └── ecosystem/            Tooling, frameworks, and libraries
-│
-├── snippets/                 Small, focused implementation examples
-│   ├── useDebounce.js
-│   ├── useOnClickOutside.js
-│   ├── PortalExample.jsx
-│   └── ...
-│
-├── utils/                    Framework-agnostic helper functions
-│   ├── debounce.js
-│   ├── throttle.js
-│   ├── formatDate.js
-│   ├── classNames.js
-│   └── storage.js
-│
-├── hooks/                    Reusable React hooks
-│   ├── useFetch.js
-│   ├── useMediaQuery.js
-│   ├── useClipboard.js
-│   ├── useOnlineStatus.js
-│   └── index.js
-│
-├── components/               Accessible UI primitives
-│   ├── Modal.jsx
-│   ├── Tooltip.jsx
-│   ├── Toast.jsx
-│   └── Loader.jsx
-│
-├── tools/                    Development environment standards
-│   ├── eslint-prettier-setup.md
-│   ├── vite-config.md
-│   ├── next-config.md
-│   ├── husky-setup.md
-│   ├── tailwind-setup.md
-│   └── vscode-extensions.md
-│
-├── playground/               Isolated experimentation environments
-│   ├── vite-demo/
-│   └── next-demo/
-│
-└── docs/                     Career, architecture, and quality guides
-├── roadmap.md
-├── interview-questions.md
-├── best-practices.md
-├── react-patterns.md
-├── project-checklist.md
-└── learning-resources.md
+├── notes/          Conceptual references and architecture notes
+├── snippets/       Small, focused implementation examples
+├── utils/          Framework-agnostic helper functions
+├── hooks/          Reusable React hooks
+├── components/     Lightweight UI primitives
+├── tools/          Tooling and configuration references
+├── playground/     Isolated environments for experimentation
+└── docs/           Career, architecture, and best-practice guides
+```
 
-````
+Structure is intentionally flexible and expected to grow over time.
 
 ---
 
 ## Quick Start
 
-### Clone the repository
-
 ```bash
 git clone https://github.com/jackson951/react-developer-utils.git
 cd react-developer-utils
-````
+code .
+```
 
-### Run the Vite playground
+Run a playground environment:
 
 ```bash
 cd playground/vite-demo
@@ -125,52 +78,89 @@ npm run dev
 
 ---
 
-## Usage
+## Example
 
-| Use Case               | Approach                                |
-| ---------------------- | --------------------------------------- |
-| Concept review         | Read documentation under `notes/`       |
-| Feature implementation | Reuse hooks, components, or snippets    |
-| New project setup      | Follow configuration guides in `tools/` |
-| Validation and testing | Experiment in `playground/`             |
-| Quality assurance      | Review `docs/project-checklist.md`      |
+```js
+import { useState, useEffect } from "react";
+
+export function useDebounce(value, delay = 300) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+```
+
+All utilities and hooks are dependency-free unless explicitly stated.
+
+---
+
+## Usage Patterns
+
+| Use Case            | Location      |
+| ------------------- | ------------- |
+| Concept review      | `notes/`      |
+| Common solutions    | `snippets/`   |
+| Cross-project logic | `utils/`      |
+| React abstractions  | `hooks/`      |
+| UI building blocks  | `components/` |
+| New project setup   | `tools/`      |
+| Validation & review | `docs/`       |
+
+---
+
+## Playground
+
+The playground directories provide isolated environments for validating patterns before adoption.
+
+```bash
+npm run dev:vite
+npm run dev:next
+```
 
 ---
 
 ## Design Principles
 
-* Declarative and predictable component design
-* Small, composable, testable units
-* Clear separation of concerns
-* Minimal dependencies
-* Documentation aligned with implementation
-
-This repository reflects modern React practices suitable for long-lived production systems.
+* Predictable over clever
+* Composable by default
+* Minimal abstraction
+* Explicit configuration
+* Documentation as part of the system
 
 ---
 
-## Contributing
+## Contribution Model
 
-This repository is designed to evolve over time.
+This repository is intentionally opinionated and personal.
 
-Contributions should:
+Recommended workflow:
 
-* Follow existing structure and naming conventions
-* Prefer clarity over abstraction
-* Include documentation where appropriate
-* Avoid premature optimization
+1. Add patterns encountered in real projects
+2. Refine or remove outdated approaches
+3. Keep examples minimal and focused
+4. Favor clarity over completeness
 
-Forks are encouraged for organization-specific customization.
+---
+
+## References
+
+* React Official Documentation
+* Epic React
+* React Patterns
+* React Conf
+* Community RFCs and proposals
 
 ---
 
 ## License
 
-MIT License
+MIT — unrestricted use in personal and commercial projects.
 
 ---
 
-*Maintained as a long-term reference for professional React development.*
-
-```
-```
+> This repository is a working system, not a finished product.
