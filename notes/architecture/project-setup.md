@@ -1,31 +1,31 @@
-# 🛠️ `project-setup.md`
+# project-setup.md
 
-_Professional React Project Setup (2025 Edition)_  
-_From `npm create` to CI/CD — zero to production-ready._
+*Professional React Project Setup (2026 Edition)*
+*From project initialization to CI/CD — production-ready by default.*
 
-> ✅ **Last Updated**: November 7, 2025  
-> 🎯 **For**: Solo devs, startups, agency teams, enterprise engineers  
-> 📦 **Stack**: Vite **or** Next.js (App Router), TypeScript, Biome, Playwright  
-> 🧪 Inspired by real-world setups at Vercel, Shopify, and open-source teams
-
----
-
-## 🚀 Step 1: Choose Your Foundation
-
-| Use Case                                  | Recommendation                 | Why                                              |
-| ----------------------------------------- | ------------------------------ | ------------------------------------------------ |
-| **Marketing site, blog, content**         | `Next.js` (App Router)         | SSR, RSC, image optimization, routing out-of-box |
-| **Dashboard, SaaS, internal tool**        | `Next.js` (App Router)         | Auth, mutations, streaming, full-stack           |
-| **SPA, PWA, Electron, embeddable widget** | `Vite + React`                 | Faster dev server, lighter, full control         |
-| **Mobile + Web**                          | `Next.js` + `Expo` (universal) | Shared logic, separate UI layers                 |
-
-> ✅ **Default 2025 choice**: **Next.js App Router** — unless you _need_ full control.
+> **Last Updated**: January 18, 2026
+> **Audience**: Solo developers, startups, agencies, enterprise teams
+> **Stack**: Next.js (App Router) or Vite, TypeScript, Biome, Vitest, Playwright
+> **Influences**: Practices from Vercel, Shopify, and mature open‑source projects
 
 ---
 
-## 📦 Step 2: Initialize the Project
+## 1. Choose Your Foundation
 
-### ✅ Next.js (App Router — Recommended)
+| Use case                        | Recommendation       | Rationale                                 |
+| ------------------------------- | -------------------- | ----------------------------------------- |
+| Marketing site, blog, content   | Next.js (App Router) | SSR, RSC, routing, image optimization     |
+| Dashboard, SaaS, internal tools | Next.js (App Router) | Full‑stack workflows, auth, streaming     |
+| SPA, PWA, Electron, widgets     | Vite + React         | Faster dev server, minimal abstraction    |
+| Mobile + Web                    | Next.js + Expo       | Shared business logic, separate UI layers |
+
+**Default (2026)**: Prefer **Next.js App Router** unless you explicitly require framework‑level control.
+
+---
+
+## 2. Initialize the Project
+
+### Next.js (App Router)
 
 ```bash
 npx create-next-app@latest my-app \
@@ -37,21 +37,21 @@ npx create-next-app@latest my-app \
   --import-alias "@/*"
 ```
 
-- ✅ `--app`: App Router (RSC-ready)
-- ✅ `--src-dir`: Clean `src/` root
-- ✅ `--import-alias "@/*"`: Absolute imports (`import { Button } from '@/components/ui/Button'`)
+Key flags:
 
-### ✅ Vite (SPA)
+* `--app`: Enables the App Router (RSC‑ready)
+* `--src-dir`: Enforces a clean `src/` root
+* `--import-alias`: Enables absolute imports
+
+### Vite (SPA)
 
 ```bash
-npm create vite@latest my-app \
-  -- --template react-ts
-
+npm create vite@latest my-app -- --template react-ts
 cd my-app
 npm install
 ```
 
-Then add essentials:
+Recommended additions:
 
 ```bash
 npm install -D biome vitest @testing-library/react @testing-library/jest-dom
@@ -60,55 +60,42 @@ npm install react-router-dom @tanstack/react-query zustand clsx
 
 ---
 
-## 🗂️ Step 3: Folder Structure (2025 Standard)
+## 3. Folder Structure (Current Standard)
 
 ```
 my-app/
 ├── src/
-│   ├── app/                  # Next.js App Router (pages, layouts, route handlers)
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   └── api/              # Route handlers (Next.js)
-│   │
+│   ├── app/                  # Next.js App Router (routes, layouts, handlers)
 │   ├── components/           # Reusable UI
-│   │   ├── ui/               # Atoms/molecules (Button, Input, Card)
-│   │   └── features/         # Business components (CheckoutForm, UserCard)
-│   │
-│   ├── hooks/                # Custom hooks (useDebounce, useLocalStorage)
-│   ├── lib/                  # Utilities (formatDate, apiClient, storage)
-│   ├── styles/               # Global CSS, Tailwind config, design tokens
-│   ├── types/                # Shared TS types (User, Product)
-│   │
-│   ├── features/             # Feature-sliced design (optional but recommended)
-│   │   └── auth/
-│   │       ├── ui/           # Auth-specific components
-│   │       ├── model/        # Hooks, types, API
-│   │       └── index.ts
-│   │
-│   └── tests/
-│       ├── unit/             # utils, hooks
-│       ├── integration/      # components + MSW
-│       └── e2e/              # Playwright
-│
-├── public/                   # Static assets (favicon, robots.txt)
-├── .env.local                # Local env (gitignored)
-├── biome.json                # Linting + formatting
-├── tsconfig.json             # Strict TS
-├── playwright.config.ts      # E2E config
+│   │   ├── ui/               # Design-system components
+│   │   └── features/         # Business-level components
+│   ├── features/             # Feature-sliced modules
+│   ├── hooks/                # Reusable hooks
+│   ├── lib/                  # Framework-agnostic utilities
+│   ├── styles/               # Global styles and tokens
+│   ├── types/                # Shared TypeScript types
+│   └── tests/                # Unit, integration, and e2e tests
+├── public/
+├── .env.local
+├── biome.json
+├── tsconfig.json
+├── playwright.config.ts
 └── package.json
 ```
 
-✅ **Key Decisions**:
+Design principles:
 
-- `src/` root (not `pages/` or flat `components/`)
-- `ui/` for design-system components, `features/` for business logic
-- `lib/` for pure utils (no React)
+* `src/` as the only source root
+* `ui/` for generic components, `features/` for domain logic
+* `lib/` must not depend on React
 
 ---
 
-## ⚙️ Step 4: Tooling Setup
+## 4. Tooling
 
-### ✅ TypeScript (`tsconfig.json`)
+### TypeScript
+
+Strict by default, no implicit escapes:
 
 ```json
 {
@@ -121,21 +108,16 @@ my-app/
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "noEmit": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src"]
 }
 ```
 
-### ✅ Biome (`biome.json`)
+### Biome
 
 ```json
 {
@@ -158,7 +140,7 @@ my-app/
 }
 ```
 
-### ✅ Scripts (`package.json`)
+### Scripts
 
 ```json
 {
@@ -170,28 +152,24 @@ my-app/
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:e2e": "playwright test",
-    "prepare": "husky"
+    "test:e2e": "playwright test"
   }
 }
 ```
 
 ---
 
-## 🔐 Step 5: Environment & Security
+## 5. Environment & Security
 
-### `.env.local` (gitignored)
+### Environment Variables
 
 ```env
-# Client-side (Next.js: NEXT_PUBLIC_; Vite: VITE_)
 NEXT_PUBLIC_API_URL=https://api.example.com
-
-# Server-side (never exposed to client)
 DATABASE_URL=postgres://...
-AUTH_SECRET=your_strong_secret_here
+AUTH_SECRET=replace_with_strong_secret
 ```
 
-### ✅ Validate at Runtime (lib/env.ts)
+### Runtime Validation
 
 ```ts
 import { z } from "zod";
@@ -205,36 +183,33 @@ const envSchema = z.object({
 export const env = envSchema.parse(process.env);
 ```
 
-### ✅ Security Hardening
+Security checklist:
 
-- [ ] Add `Content-Security-Policy` header (Next.js: `next-secure-headers`)
-- [ ] Sanitize user content (`DOMPurify`)
-- [ ] Rate limit API routes
-- [ ] `npm audit --production` in CI
+* Content Security Policy headers
+* Input sanitization (DOMPurify)
+* API rate limiting
+* Dependency auditing in CI
 
 ---
 
-## 🧪 Step 6: Testing Strategy
+## 6. Testing Strategy
 
-| Level           | Tool         | Coverage Goal       | Example                            |
-| --------------- | ------------ | ------------------- | ---------------------------------- |
-| **Unit**        | Vitest + RTL | ≥70% (utils, hooks) | `useDebounce`, `formatDate`        |
-| **Integration** | RTL + MSW    | ≥50% (components)   | `<LoginForm>` with mocked API      |
-| **E2E**         | Playwright   | 3–5 core user flows | Login → Add item → Checkout        |
-| **A11y**        | `axe-core`   | 100% pass           | `npx playwright test --grep @a11y` |
+| Level         | Tooling               | Scope               |
+| ------------- | --------------------- | ------------------- |
+| Unit          | Vitest                | Utilities and hooks |
+| Integration   | Testing Library + MSW | Component behavior  |
+| E2E           | Playwright            | Critical user flows |
+| Accessibility | axe-core              | WCAG compliance     |
 
-**Playwright setup**:
+Playwright initialization:
 
 ```bash
 npm init playwright@latest
-# → Select TypeScript, Chrome, install dependencies
 ```
 
 ---
 
-## 🚀 Step 7: CI/CD (GitHub Actions)
-
-`.github/workflows/ci.yml`:
+## 7. CI/CD (GitHub Actions)
 
 ```yaml
 name: CI
@@ -255,83 +230,33 @@ jobs:
       - run: npm run test -- --coverage
       - run: npm run build
       - run: npm run test:e2e
-        env:
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 ```
 
-✅ **Bonus**: Add Lighthouse CI for PR previews.
+Optional extensions: Lighthouse CI, preview deployments, bundle analysis.
 
 ---
 
-## 👥 Step 8: Team Onboarding
+## 8. Team Enablement
 
-### `CONTRIBUTING.md`
+### CONTRIBUTING.md
 
-```md
-## Local Setup
+* Deterministic local setup
+* Enforced branch naming
+* Mandatory tests and review gates
 
-1. `git clone`
-2. `npm install`
-3. Copy `.env.example` → `.env.local` and fill secrets
-4. `npm run dev`
+### Architecture Decision Records
 
-## Branch Strategy
-
-- `main`: production
-- `feat/*`, `fix/*`: feature/bug branches
-- PRs require: ✅ lint, ✅ tests, ✅ review
-
-## PR Template
-
-- [ ] Tests added/updated
-- [ ] A11y checked (keyboard, screen reader)
-- [ ] Mobile responsive
-- [ ] Screenshots (if UI change)
-```
-
-### `ADR.md` (Architecture Decision Records)
-
-```md
-## 2025-11-07: Choose Zustand over Redux
-
-### Status: Accepted
-
-### Context
-
-Team struggled with Redux boilerplate and Provider trees.
-
-### Decision
-
-Use Zustand for global UI state (cart, filters).
-
-### Consequences
-
-✅ Simpler code  
-✅ No Provider needed  
-⚠️ Must avoid putting API data in Zustand (→ TanStack Query)
-```
+Use ADRs to document irreversible or high‑impact decisions.
 
 ---
 
-## 📦 Starter Templates
+## Starter Templates
 
-| Template                           | Command                                                                                                           |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Next.js + RSC + TanStack Query** | `npx create-next-app@latest --example https://github.com/vercel/next.js/tree/canary/examples/with-tanstack-query` |
-| **Vite + React + Biome**           | [GitHub Gist](https://gist.github.com/...)                                                                        |
-| **Full-stack (Next.js + Prisma)**  | `npx create-next-app@latest --example with-prisma`                                                                |
-
----
-
-## 📚 Recommended Reading
-
-- 📘 [Next.js: App Router](https://nextjs.org/docs/app)
-- 🧪 [Vite: React Setup](https://vitejs.dev/guide/#scaffolding-your-first-vite-project)
-- 🛠️ [Biome Configuration Guide](https://biomejs.dev/guides/configuring-biome/)
-- 📊 [Playwright Best Practices](https://playwright.dev/docs/best-practices)
+* Next.js App Router: [https://nextjs.org/docs/app](https://nextjs.org/docs/app)
+* Vite React Scaffolding: [https://vitejs.dev/guide/](https://vitejs.dev/guide/)
+* Biome Configuration: [https://biomejs.dev/guides/configuring-biome/](https://biomejs.dev/guides/configuring-biome/)
+* Playwright Best Practices: [https://playwright.dev/docs/best-practices](https://playwright.dev/docs/best-practices)
 
 ---
 
-> 💡 **Final Thought**:  
-> _“A great setup isn’t about the latest tools — it’s about removing friction so your team can focus on building value.”_  
-> — Start simple, automate relentlessly, evolve intentionally.
+**Guiding principle**: Optimize for clarity, repeatability, and long‑term maintainability. Tooling exists to reduce friction, not to define a
