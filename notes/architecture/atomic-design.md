@@ -2,7 +2,7 @@
 
 *Atomic Design: Principles, Practice, and Pragmatism (2025)*
 
-**Last updated:** November 7, 2025
+**Last updated:** January 18, 2026
 
 **Summary**
 
