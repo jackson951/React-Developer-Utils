@@ -1,228 +1,124 @@
-# 🧼 `clean-code-patterns.md`
+# Clean Code Patterns in React
 
-_Clean Code in React: Readability, Maintainability, and Team Scalability (2025 Edition)_
+*Clean Code in React: Readability, Maintainability, and Team Scalability (2025)*
 
-> ✅ **Last Updated**: November 7, 2025  
-> 📌 **TL;DR**:
->
-> - **Code is read 10x more than written** — optimize for humans first.
-> - Prefer **explicit over clever**, **composable over monolithic**, **tested over “works on my machine.”**
-> - In 2025: Enforce with **Biome**, **TypeScript strict mode**, and **Playwright E2E**.
-> - Clean code ≠ minimal code — it’s _intentional_ code.
+**Last updated:** November 7, 2025
 
----
+**Summary**
 
-## 🧭 Core Principles (React-Specific)
-
-| Principle                  | Anti-Pattern                                             | Clean Alternative                                       |
-| -------------------------- | -------------------------------------------------------- | ------------------------------------------------------- |
-| **Single Responsibility**  | `<UserCard>` fetches data, formats dates, handles delete | Split: `<UserCard>` (UI), `useUser(id)`, `formatDate()` |
-| **Explicit over Implicit** | Magic strings: `status === 'active'`                     | Enums/const: `UserStatus.ACTIVE`                        |
-| **Fail Fast**              | Silent `catch { }`                                       | `catch (err) { logAndRethrow(err, 'fetchUser') }`       |
-| **No Surprises**           | Side effects in render                                   | Move to `useEffect`, `useAction`, or event handler      |
-| **Testability**            | `useEffect` with `fetch` + no mocks                      | Isolate data layer: `api.getUser()` → mock in tests     |
-
-> ✅ From [React Docs](https://react.dev/learn):  
-> _“Components should do one thing well, and compose to form complex UIs.”_
+* Code is read significantly more than it is written; optimize for clarity.
+* Prefer **explicit over clever**, **composable over monolithic**, **tested over anecdotal correctness**.
+* In modern React, clean code is enforced through **TypeScript strict mode**, **Biome**, and **automated testing**.
+* Clean code is not minimal code; it is intentional and communicative.
 
 ---
 
-## 📦 File & Folder Structure
+## Core Principles (React-Specific)
 
-### ✅ Recommended (Feature-Sliced Design + Atomic)
+| Principle             | Anti-Pattern                                                    | Preferred Approach                     |
+| --------------------- | --------------------------------------------------------------- | -------------------------------------- |
+| Single Responsibility | A component fetches data, formats values, and handles mutations | Separate UI, hooks, and utilities      |
+| Explicitness          | Magic strings and implicit state                                | Enums, constants, and named conditions |
+| Fail Fast             | Silent error handling                                           | Log, surface, or rethrow errors        |
+| Predictability        | Side effects during render                                      | Effects, actions, or event handlers    |
+| Testability           | Hard-coded dependencies                                         | Isolated data and logic layers         |
+
+React guidance: [https://react.dev/learn](https://react.dev/learn)
+
+---
+
+## File and Folder Structure
+
+A feature-oriented structure scales better than global component buckets.
 
 ```bash
 src/
 ├── features/
 │   └── cart/
-│       ├── ui/              # CartButton, CartModal (reusable)
-│       ├── model/           # useCart.ts, types.ts, api.ts
-│       └── CartPage.tsx    # Page: composes ui + model
+│       ├── ui/
+│       ├── model/
+│       └── CartPage.tsx
 │
 ├── shared/
-│   ├── ui/                  # Atoms: Button, Input, Card
-│   ├── lib/                 # formatDate, debounce, storage
-│   └── types/               # User, Product (global domain types)
+│   ├── ui/
+│   ├── lib/
+│   └── types/
 │
 ├── app/
-│   ├── layout.tsx           # App shell (Server Component)
-│   └── page.tsx             # Home page
+│   ├── layout.tsx
+│   └── page.tsx
 │
 └── tests/
-    ├── unit/                # helpers, hooks
-    ├── integration/         # components + mocks
-    └── e2e/                 # Playwright user flows
+    ├── unit/
+    ├── integration/
+    └── e2e/
 ```
 
-✅ **Rules**:
+Conventions:
 
-- **1 component = 1 file** (no `components/index.tsx` dumping ground)
-- **Barrel files only for public APIs**:
-  ```ts
-  // features/cart/index.ts
-  export { CartPage } from "./CartPage";
-  export { useCart } from "./model/useCart";
-  // ❌ Never: export * from './lib/internalUtils';
-  ```
+* One component per file
+* Barrel files only for public APIs
+* Feature code owns its UI and logic
 
 ---
 
-## ✍️ Naming Conventions (TypeScript + React)
+## Naming Conventions
 
-| What           | Good                                  | Bad                           | Why                                |
-| -------------- | ------------------------------------- | ----------------------------- | ---------------------------------- |
-| **Components** | `UserAvatar`, `SearchBar`             | `Avatar`, `Search`            | Noun + specificity                 |
-| **Hooks**      | `useLocalStorage`, `useDebounce`      | `withStorage`, `debounceHook` | `use` prefix, verb-noun            |
-| **Utils**      | `formatCurrency`, `isEmailValid`      | `helper`, `utils`             | Action-oriented, self-documenting  |
-| **Props**      | `isLoading`, `onSubmit`               | `loading`, `submit`           | Boolean: `is/has`; Callback: `on*` |
-| **Types**      | `UserStatus = 'active' \| 'inactive'` | `string`                      | Narrow + explicit                  |
+| Category   | Recommendation                   | Rationale                  |
+| ---------- | -------------------------------- | -------------------------- |
+| Components | `UserAvatar`, `SearchBar`        | Clear domain intent        |
+| Hooks      | `useLocalStorage`, `useDebounce` | Consistent React semantics |
+| Utilities  | `formatCurrency`, `isEmailValid` | Action-oriented names      |
+| Booleans   | `isLoading`, `hasAccess`         | Self-documenting state     |
+| Callbacks  | `onSubmit`, `onClose`            | Predictable event handling |
 
-✅ **Enforce with ESLint**:
-
-```json
-{
-  "rules": {
-    "react-hooks/rules-of-hooks": "error",
-    "@typescript-eslint/naming-convention": [
-      "error",
-      {
-        "selector": "function",
-        "format": ["camelCase"],
-        "leadingUnderscore": "allow"
-      },
-      { "selector": "variable", "format": ["camelCase", "UPPER_CASE"] },
-      { "selector": "typeLike", "format": ["PascalCase"] }
-    ]
-  }
-}
-```
+TypeScript naming guidance: [https://www.typescriptlang.org/docs/](https://www.typescriptlang.org/docs/)
 
 ---
 
-## 🧩 Component Patterns
+## Component Design Patterns
 
-### ✅ Small, Focused Components
+### Small, Focused Components
 
-```tsx
-// ❌ Monolithic
-function UserProfile({ user }) {
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState(user.name);
-  const save = async () => {
-    /* fetch + validation + toast */
-  };
-  return (
-    <div>
-      {editing ? (
-        <input value={name} onChange={(e) => setName(e.target.value)} />
-      ) : (
-        <h1>{user.name}</h1>
-      )}
-      <button onClick={editing ? save : () => setEditing(true)}>
-        {editing ? "Save" : "Edit"}
-      </button>
-    </div>
-  );
-}
+Components should have one reason to change and compose cleanly.
 
-// ✅ Clean: Split concerns
-const UserNameDisplay = ({ name }: { name: string }) => <h1>{name}</h1>;
-const UserNameEdit = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) => <input value={value} onChange={(e) => onChange(e.target.value)} />;
-const EditButton = ({
-  isEditing,
-  onClick,
-}: {
-  isEditing: boolean;
-  onClick: () => void;
-}) => <button onClick={onClick}>{isEditing ? "Save" : "Edit"}</button>;
+* Move side effects into hooks or actions
+* Extract reusable display logic
+* Avoid stateful components doing multiple jobs
 
-function UserProfile({ user }: { user: User }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user.name);
-  const save = useActionState(async () => {
-    await updateUser({ name });
-    setIsEditing(false);
-  }, user.name);
-
-  return (
-    <div>
-      {isEditing ? (
-        <UserNameEdit value={name} onChange={setName} />
-      ) : (
-        <UserNameDisplay name={name} />
-      )}
-      <EditButton
-        isEditing={isEditing}
-        onClick={isEditing ? save : () => setIsEditing(true)}
-      />
-    </div>
-  );
-}
-```
-
-✅ **Benefits**:
-
-- Each component has **one reason to change**
-- Reusable (`UserNameDisplay` in `<Header>`, `<Card>`)
-- Testable in isolation
+This improves reuse, testing, and long-term maintainability.
 
 ---
 
-## 🧪 Testing as Design Tool
+## Testing as a Design Constraint
 
-> “If it’s hard to test, it’s poorly designed.” — Kent C. Dodds
+Testing difficulty is often a signal of poor design.
 
-### ✅ Testable Code Traits
+| Trait                 | Outcome                        |
+| --------------------- | ------------------------------ |
+| Pure functions        | Deterministic, easy to test    |
+| Isolated hooks        | Can be validated independently |
+| Explicit dependencies | Simple mocking and stubbing    |
+| Thin components       | Behavior-focused tests         |
 
-| Trait                             | Example                                             |
-| --------------------------------- | --------------------------------------------------- |
-| **Pure functions**                | `formatDate(date: Date): string`                    |
-| **Hooks with no side effects**    | `useCounter()` → test with `renderHook`             |
-| **Components with mockable deps** | `<UserList users={...} />` (not `useEffect(fetch)`) |
-| **Explicit dependencies**         | `api.getUser = jest.fn()`                           |
+Testing references:
 
-**Test structure** (AAA: Arrange-Act-Assert):
-
-```tsx
-// hooks/useCart.test.ts
-test("adds item to cart", () => {
-  // Arrange
-  const { result } = renderHook(() => useCart());
-
-  // Act
-  act(() => result.current.addItem({ id: "1", name: "Book" }));
-
-  // Assert
-  expect(result.current.items).toHaveLength(1);
-  expect(result.current.items[0].id).toBe("1");
-});
-```
-
-✅ **Coverage targets**:
-
-- ≥80% for **utils/hooks**
-- ≥70% for **components** (focus on behavior, not implementation)
-- 100% for **critical paths** (auth, payments)
+* React Testing Library: [https://testing-library.com/docs/react-testing-library/intro/](https://testing-library.com/docs/react-testing-library/intro/)
+* Playwright: [https://playwright.dev](https://playwright.dev)
 
 ---
 
-## 🛠️ Tooling for Clean Code (2025 Stack)
+## Tooling for Clean Code (2025)
 
-| Tool                    | Role                      | Setup                                               |
-| ----------------------- | ------------------------- | --------------------------------------------------- |
-| **Biome**               | Linting + Formatting + TS | `npm create @biomejs/biome@latest`                  |
-| **TypeScript**          | Type safety               | `strict: true`, `noUncheckedIndexedAccess: true`    |
-| **Playwright**          | E2E tests                 | `npx playwright init`                               |
-| **Husky + lint-staged** | Pre-commit checks         | `npx husky add .husky/pre-commit "npx lint-staged"` |
-| **Commitlint**          | Conventional commits      | Enforce `feat:`, `fix:`, `chore:`                   |
+| Tool       | Purpose                | Reference                                                            |
+| ---------- | ---------------------- | -------------------------------------------------------------------- |
+| Biome      | Linting and formatting | [https://biomejs.dev](https://biomejs.dev)                           |
+| TypeScript | Static type safety     | [https://www.typescriptlang.org](https://www.typescriptlang.org)     |
+| Playwright | End-to-end testing     | [https://playwright.dev](https://playwright.dev)                     |
+| Husky      | Git hooks              | [https://typicode.github.io/husky](https://typicode.github.io/husky) |
+| Commitlint | Commit standards       | [https://commitlint.js.org](https://commitlint.js.org)               |
 
-**`.biome.json` (minimal strict config)**:
+Minimal Biome configuration:
 
 ```json
 {
@@ -231,9 +127,7 @@ test("adds item to cart", () => {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "style": { "noNonNullAssertion": "error" },
-      "correctness": { "noUnusedVariables": "error" }
+      "recommended": true
     }
   },
   "formatter": {
@@ -246,27 +140,25 @@ test("adds item to cart", () => {
 
 ---
 
-## 🚫 Common Anti-Patterns
+## Common Anti-Patterns
 
-| Anti-Pattern                                 | Why Bad                          | Fix                                           |
-| -------------------------------------------- | -------------------------------- | --------------------------------------------- |
-| **Prop drilling past 2 levels**              | Fragile, hard to refactor        | → Context (sparingly), Zustand, or colocation |
-| **Large `useEffect` with multiple concerns** | Unmaintainable, race conditions  | → Split into focused effects or custom hooks  |
-| **`any` or `// @ts-ignore`**                 | Type safety erosion              | → Use `unknown` + validation, or `zod` schema |
-| **Inline styles/strings**                    | Unmaintainable theming           | → Extract to `styles/` or design tokens       |
-| **Silent error swallowing**                  | Debugging nightmares             | → Log + rethrow or show toast                 |
-| **Over-memoization**                         | Cognitive overhead, no perf gain | → Profile first; use React Compiler (2025+)   |
-
----
-
-## 📚 Recommended Reading
-
-- 📘 [Clean Code (Robert C. Martin)](https://www.oreilly.com/library/view/clean-code-a/9780136083238/) — _The classic_
-- 🧪 [Epic React: Clean Code Module](https://epicreact.dev/modules/react-fundamentals) — _React-specific_
-- 📊 [React Docs: Thinking in React](https://react.dev/learn/thinking-in-react)
-- 🛠️ [Biome Rules Reference](https://biomejs.dev/linter/rules/)
+| Anti-Pattern           | Impact                 | Correction                  |
+| ---------------------- | ---------------------- | --------------------------- |
+| Deep prop drilling     | Fragile APIs           | Context or state colocation |
+| Large effects          | Hidden coupling        | Split by responsibility     |
+| `any` or ignored types | Type erosion           | Narrow types or validation  |
+| Inline constants       | Poor reuse             | Extract tokens or helpers   |
+| Over-optimization      | Unnecessary complexity | Measure before optimizing   |
 
 ---
 
-> 💡 **Final Thought**:  
-> _“Clean code is not written by following a checklist — it emerges from empathy: for your future self, your teammates, and your users.”_
+## Further Reading
+
+* Clean Code — Robert C. Martin: [https://www.oreilly.com/library/view/clean-code-a/9780136083238/](https://www.oreilly.com/library/view/clean-code-a/9780136083238/)
+* Epic React: [https://epicreact.dev](https://epicreact.dev)
+* Thinking in React: [https://react.dev/learn/thinking-in-react](https://react.dev/learn/thinking-in-react)
+* Biome Rules Reference: [https://biomejs.dev/linter/rules/](https://biomejs.dev/linter/rules/)
+
+---
+
+Clean code emerges from empathy for future maintainers, not from rigid adherence to rules.
