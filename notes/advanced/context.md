@@ -1,14 +1,14 @@
+
 # 🧠 `context.md`
 
-_Understanding `useContext` — power, pitfalls, and 2025 best practices._
+_Understanding `useContext` — power, pitfalls, and modern best practices._
 
-> ✅ **Last Updated**: November 7, 2025  
 > 📌 **TL;DR**:
 >
-> - Context is for **low-frequency, global state** (theme, auth, locale).
-> - **Avoid Context for high-frequency state** (e.g., form inputs, UI toggles).
-> - Prefer **colocation** > Context > Zustand/Jotai > Redux.
-> - In RSC world: **Server Context ≠ Client Context** — tread carefully.
+> - Context is for **low-frequency, truly global state** (theme, auth, locale).
+> - **Avoid Context for high-frequency updates** (form inputs, real-time counters).
+> - Prefer **colocation** → Context → Zustand / Jotai → Redux (in that order).
+> - In RSC world: **Server Context ≠ Client Context**. Pass data via props or cookies, not Context.
 
 ---
 
@@ -37,73 +37,69 @@ function Toolbar() {
 }
 ```
 
-✅ **Use Case**: Theming, user auth, locale, app-wide config.
+✅ **Ideal for**: Theme, authenticated user, locale, feature flags, or any data that changes rarely and is needed in many places.
 
 ---
 
 ## 🚫 When _Not_ to Use Context (Critical!)
 
-### ❌ Anti-Pattern: High-Frequency State
+### ❌ Anti-Pattern 1: High-Frequency Updates
 
-Context causes **re-renders of _all_ consumers** when value changes — even if they only use part of it.
+Context re-renders **every consumer** when the value changes — even if they only use a small portion.
 
 ```tsx
 // ❌ BAD: Cart state in Context → every cart update re-renders *entire app*
 const CartContext = createContext({ items: [], addItem: () => {} });
 
-// ✅ BETTER: Zustand (only components using `items` re-render)
+// ✅ BETTER: Zustand (only components reading `items` re-render)
 const useCart = create<{
   items: Item[];
   addItem: (item: Item) => void;
-}>()(/* ... */);
+}>(() => ({ items: [], addItem: /* ... */ }));
 ```
 
-### ❌ Anti-Pattern: Derived or Computed State
+### ❌ Anti-Pattern 2: Replacing Simple Props
 
-Don’t put `filteredItems`, `isLoading`, or `error` in Context — compute it locally.
+If data travels only 1–2 levels, **just pass props**. Context adds unnecessary indirection and harms readability.
 
-### ❌ Anti-Pattern: Replacing Props
+### ❌ Anti-Pattern 3: Putting Derived Data in Context
 
-If only 1–2 levels deep, **just pass props**. Context adds indirection.
+Never store `filteredItems`, `isLoading`, or `error` inside Context. Derive them locally in the consuming component.
+
+### ❌ Anti-Pattern 4: One Giant Context
+
+Avoid a single “app state” context. Split by concern (theme, auth, cart) to minimize re-renders.
 
 ---
 
 ## 🧩 Advanced Patterns
 
-### 1. **Compound Provider Pattern**
+### 1. Compound Provider Wrapper
 
-Avoid provider hell (`<A><B><C>...</C></B></A>`) with a single wrapper:
+Clean up provider nesting with a single composable component:
 
 ```tsx
-// providers/AllProviders.tsx
-export function AllProviders({ children }: { children: React.ReactNode }) {
+// providers/AppProviders.tsx
+export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          {children}
+        </CartProvider>
       </ThemeProvider>
     </AuthProvider>
   );
 }
-
-// _app.tsx (Next.js)
-export default function App({ Component, pageProps }) {
-  return (
-    <AllProviders>
-      <Component {...pageProps} />
-    </AllProviders>
-  );
-}
 ```
 
-### 2. **Split Contexts (Read/Write Separation)**
+### 2. Split Contexts (Read / Write Separation)
 
-Prevent unnecessary re-renders by separating state and setters:
+Prevent re-renders by separating state from its setter.
 
 ```tsx
-// ✅ GOOD: Split context for theme
 const ThemeStateContext = createContext<"light" | "dark">("light");
-const ThemeDispatchContext = createContext<(theme: "light" | "dark") => void>(
+const ThemeDispatchContext = createContext<(t: "light" | "dark") => void>(
   () => {}
 );
 
@@ -118,7 +114,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Consumer reads state *or* dispatch — not both
+// Consumers import only what they need
 export function useTheme() {
   return useContext(ThemeStateContext);
 }
@@ -128,90 +124,143 @@ export function useSetTheme() {
 }
 ```
 
-> ✅ Only components calling `useSetTheme()` re-render when `setTheme` changes (it’s stable).
+> ✅ A component that only calls `useSetTheme()` never re-renders when the theme changes.
+
+### 3. Context + `useReducer`
+
+For more complex global state (e.g., multi-step wizards), combine Context with `useReducer`.
+
+```tsx
+type Action = { type: "NEXT_STEP" } | { type: "PREV_STEP" };
+const WizardDispatchContext = createContext<Dispatch<Action>>(() => {});
+
+export function useWizardDispatch() {
+  return useContext(WizardDispatchContext);
+}
+```
 
 ---
 
-## ⚠️ Context + Server Components (RSC) — Landmines!
+## ⚠️ Context + Server Components (RSC) — Key Landmines
 
-### ❗ Context **does not cross** Server → Client boundary.
+### Context **cannot cross** the Server → Client boundary.
 
-- ✅ Server Components can _create_ and _consume_ Context (server-only).
-- ✅ Client Components can _create_ and _consume_ Context (client-only).
-- ❌ **Server Component cannot pass value to Client Component via Context**.
+- ✅ Server Components can create and consume server-only Context.
+- ✅ Client Components can create and consume client-only Context.
+- ❌ **A Server Component cannot provide a value to a Client Component via Context.**
 
 ```tsx
 // ❌ THIS DOES NOT WORK
 // app/layout.tsx (Server Component)
-export default function Layout({ children }) {
+export default function RootLayout({ children }) {
   return (
     <UserContext.Provider value={{ name: "Alice" }}>
-      {" "}
-      {/* Server value */}
-      {children}
+      {children} {/* includes Client Components */}
     </UserContext.Provider>
   );
 }
+// Client component will see `undefined`.
+```
 
-// app/page.tsx → includes <UserProfile /> (Client Component)
-// UserProfile.tsx
-("use client");
-export default function UserProfile() {
-  const user = useContext(UserContext); // → undefined!
+### ✅ Correct Approaches
+
+| Approach                         | When                                                      |
+| -------------------------------- | --------------------------------------------------------- |
+| **Pass data via props**          | Small, serializable values (`userId`, `theme`)            |
+| **Store in cookies / headers**   | Server writes, Client reads via `cookies()` / `headers()` |
+| **Hydrate client state**         | Server embeds data in a `<script>` tag, client picks up   |
+| **Server Actions + revalidation**| Mutations happen on server; client re-fetches             |
+
+Example: passing theme from server to client using cookies.
+
+```tsx
+// app/layout.tsx (Server)
+import { cookies } from "next/headers";
+
+export default function RootLayout({ children }) {
+  const theme = cookies().get("theme")?.value || "light";
+  return (
+    <html className={theme}>
+      <body>{children}</body>
+    </html>
+  );
 }
 ```
 
-### ✅ Solutions:
-
-| Approach                             | When                                               |
-| ------------------------------------ | -------------------------------------------------- |
-| **Pass via props**                   | Small, serializable data (`user.id`, `theme`)      |
-| **Zustand `persist`**                | Hydrate client state from server cookie/`<script>` |
-| **Server Actions + `useOptimistic`** | Mutate state on server, optimistic UI on client    |
-| **`next/navigation` cache**          | Cache user data via `headers().get('x-user')`      |
-
-> 📚 Read: [Next.js: Sharing Data Between Server and Client](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#passing-data-to-client-components)
-
 ---
 
-## 🆚 Context vs. Alternatives (2025)
+## 🆚 Context vs. Alternatives (Modern Stack)
 
-| Tool                            | Best For                                    | Caveats                                         |
-| ------------------------------- | ------------------------------------------- | ----------------------------------------------- |
-| **`useContext` + `useReducer`** | Small apps, simple global state             | Re-renders all consumers on _any_ change        |
-| **Zustand**                     | Medium/large apps, UI state (cart, filters) | No Provider needed; granular subscriptions      |
-| **Jotai**                       | Fine-grained state, atom-based reactivity   | Lightweight, React-idiomatic                    |
-| **TanStack Query**              | **Server-cached data only** (users, posts)  | Never put API data in Context!                  |
-| **React Server Components**     | Data fetching + rendering on server         | Bypass client state entirely for static content |
+| Tool                | Best For                                    | Watch Out For                                      |
+| ------------------- | ------------------------------------------- | -------------------------------------------------- |
+| **React Context**   | Truly global, low-frequency state           | Re-renders all consumers on change                 |
+| **Zustand**         | Medium/large apps, UI state (cart, filters) | Not for server-cached data                         |
+| **Jotai**           | Fine-grained, atom-based reactivity         | Slightly different mental model                    |
+| **TanStack Query**  | **Server-cached data** (posts, user list)   | Never put server data in Context!                  |
+| **Server Components**| Static data, direct DB access              | No client interactivity                            |
 
-> ✅ **Golden Rule**:  
-> _“If your state comes from an API, use TanStack Query.  
-> If it’s UI state used across routes, use Zustand.  
-> If it’s truly global (theme/auth), use Context — sparingly.”_
+> ✅ **Golden Rule**:
+> *“If it comes from an API → TanStack Query.  
+> If it’s UI state shared across routes → Zustand.  
+> If it changes rarely and is truly global (theme, auth) → Context.”*
 
 ---
 
 ## 🛠️ Performance Tips
 
-1. **Memoize the value**:
+1. **Memoize the value** (especially if it contains objects):
    ```tsx
    <UserContext.Provider value={useMemo(() => ({ user, setUser }), [user])}>
    ```
-2. **Split contexts** (as shown above).
-3. **Avoid objects in value**: Prefer primitives or memoized objects.
-4. **Profile**: Use React DevTools → _Highlight updates when components render_.
+2. **Split contexts** into state + dispatch (as shown above).
+3. **Avoid object literals** inside the value; prefer primitives or memoized references.
+4. **Profile with React DevTools** – enable “Highlight updates when components render” to spot over-renders.
+
+---
+
+## 🧪 Testing Components that Consume Context
+
+Wrap the component with the required provider(s) in tests.
+
+```tsx
+// test-utils.tsx
+export function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <AppProviders>
+      {ui}
+    </AppProviders>
+  );
+}
+
+// MyComponent.test.tsx
+test("displays user name", () => {
+  renderWithProviders(<UserProfile />);
+  // assertions...
+});
+```
+
+For isolated tests, provide a custom mock value:
+
+```tsx
+render(
+  <UserContext.Provider value={mockUser}>
+    <UserProfile />
+  </UserContext.Provider>
+);
+```
 
 ---
 
 ## 📚 Recommended Reading
 
-- [React Docs: Context](https://react.dev/reference/react/useContext)
+- [React Docs: useContext](https://react.dev/reference/react/useContext)
+- [Passing Data Deeply with Context](https://react.dev/learn/passing-data-deeply-with-context)
 - [You Might Not Need Context (React Docs)](https://react.dev/learn/passing-data-deeply-with-context#when-to-use-context)
-- [How to Optimize React Context (Dan Abramov)](https://react.dev/learn/passing-data-deeply-with-context#how-to-optimize-context-re-renders)
-- [Next.js: Context and Server Components](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#server-and-client-composition)
+- [How to Optimize Context Re-renders](https://react.dev/learn/passing-data-deeply-with-context#how-to-optimize-context-re-renders)
+- [Next.js: Server & Client Composition](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns)
 
 ---
 
 > 💡 **Final Thought**:  
-> _“Context is a tool, not a solution. Use it to remove friction — not to hide complexity.”_  
-> — Adapted from Kent C. Dodds
+> *“Context is a distribution mechanism, not a state management tool. Use it to avoid prop drilling, not to manage complexity. The simpler your state, the less you need Context.”*
+```
