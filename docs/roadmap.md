@@ -1,7 +1,6 @@
-# 🗺️ React Mastery Roadmap (2025 Edition)  
+# 🗺️ React Mastery Roadmap
 *Zero to production-ready — and beyond.*
 
-> ✅ **Last Updated**: November 7, 2025  
 > 🎯 **For**:  
 > - Absolute beginners (`<html>` → React)  
 > - JS devs transitioning to React  
@@ -10,8 +9,8 @@
 > - Learn fundamentals deeply  
 > - Build early, ship often  
 > - Prioritize **concepts over libraries**  
-> - TypeScript is non-optional in 2025  
-> 🔗 **All links verified & current** (as of Nov 2025)
+> - TypeScript is non-optional in modern React  
+> 🔗 **All links verified & current**
 
 ---
 
@@ -97,13 +96,13 @@
 
 ## 🌐 Stage 3: Ecosystem Fluency (Real-World Apps)
 
-### 🗺️ The Modern Stack (2025 Standard)
+### 🗺️ The Modern Stack
 | Layer | Recommended | Why |
 |-------|-------------|-----|
 | **Framework** | Next.js (App Router) | SSR, RSC, routing, data, auth out-of-box |
 | **Styling** | Tailwind CSS + `clsx` | Utility-first, no CSS-in-JS runtime |
 | **Forms** | `react-hook-form` + Zod | Performant, type-safe, RSC-compatible |
-| **Data Fetching** | **TanStack Query v5** (for client) + **Server Actions** (for mutations) | Stale-while-revalidate, mutations, SSR support |
+| **Data Fetching** | **TanStack Query** (for client) + **Server Actions** (for mutations) | Stale-while-revalidate, mutations, SSR support |
 | **Global State** | **Zustand** (UI state) | Simpler, no Provider hell |
 | **Testing** | Vitest + RTL + Playwright | Fast, modern, full coverage |
 | **UI Components** | Build your own + `@radix-ui/react` | No heavy libraries (avoid MUI/Ant unless required) |
@@ -119,7 +118,7 @@
 | **`useOptimistic`** | [Optimistic UI](https://react.dev/reference/react/useOptimistic) | Live comment feed |
 | **Forms (RHF + Zod)** | [RHF + Zod Guide](https://www.react-hook-form.com/get-started#TypeScript) | Multi-step onboarding |
 | **State (Zustand)** | [Zustand Docs](https://github.com/pmndrs/zustand) | Shopping cart, filters |
-| **Data (TanStack Query)** | [TKQ v5 Guide](https://tanstack.com/query/v5) | User/profile dashboard |
+| **Data (TanStack Query)** | [TanStack Query v5 Guide](https://tanstack.com/query/v5) | User/profile dashboard |
 | **Testing** | [Vitest + RTL](https://vitest.dev/guide/testing.html#react-testing) | Test hooks, components, E2E flows |
 
 > 📌 **Exit Criteria**:  
@@ -189,7 +188,7 @@
 | Area | Resource | Outcome |
 |------|----------|---------|
 | **React Internals** | [React Source Walkthrough](https://github.com/facebook/react/tree/main/packages/react-reconciler) | Understand: Fiber, Reconciliation, Batching |
-| **Compiler Era** | [React Compiler (Optimizing Compiler)](https://react.dev/blog/2024/12/05/react-compiler-private-beta) | Adopt `use`, automatic memoization |
+| **React Compiler** | [React Compiler (Automatic Memoization)](https://react.dev/learn/react-compiler) | Adopt compiler, reduce manual `useMemo`/`useCallback` |
 | **Advanced Patterns** | [Advanced React Patterns](https://epicreact.dev/modules/advanced-react-patterns) | Build compound, state machine, render-prop-free APIs |
 | **Scaling Apps** | [Feature-Sliced Design](https://feature-sliced.design) | Modular, team-scalable architecture |
 | **Performance at Scale** | [React Perf Deep Dive](https://www.youtube.com/watch?v=7SJ6n7NqVJ4) | Diagnose & fix 10k+ item lists |
@@ -213,7 +212,7 @@
 
 ## 📅 Sample 6-Month Plan (Part-Time, 10–15 hrs/week)
 
-| Month | Focus | Deliverable |
+| Phase | Focus | Deliverable |
 |-------|-------|-------------|
 | **1** | JS + React Fundamentals | Todo app (Vite + TS) |
 | **2** | Next.js + Data | Blog with MDX + comments (Server Actions) |
@@ -230,14 +229,14 @@
 
 ---
 
-## 📚 Essential Resources (2025)
+## 📚 Essential Resources
 
 | Type | Recommendation |
 |------|----------------|
 | **Docs** | [react.dev](https://react.dev), [nextjs.org](https://nextjs.org) |
 | **Course** | [Epic React (Kent C. Dodds)](https://epicreact.dev) — *best for deep mastery* |
 | **Free Course** | [Scrimba: Learn React](https://scrimba.com/learn/learnreact) |
-| **Book** | [The Road to React (2025)](https://www.robinwieruch.de/the-road-to-react/) |
+| **Book** | [The Road to React](https://www.robinwieruch.de/the-road-to-react/) |
 | **Community** | [Reactiflux Discord](https://reactiflux.com), r/reactjs |
 | **News** | [React Status](https://react.statuscode.com), [React Blog](https://react.dev/blog) |
 
@@ -248,7 +247,7 @@
 1. **Skipping JS fundamentals** → leads to magical thinking  
 2. **Learning from outdated tutorials** (pre-2022) → class components, Redux-first  
 3. **Over-engineering early** → no need for Redux/Zustand in todo apps  
-4. **Ignoring TypeScript** → 95%+ of React jobs require it in 2025  
+4. **Ignoring TypeScript** → 95%+ of React jobs require it in modern development  
 5. **Not testing** → "It works on my machine" is not a strategy  
 6. **Building in isolation** → share code early, get feedback
 
@@ -271,3 +270,4 @@ You just need to start — and keep going.
 
 ---
 
+> 📥 **This roadmap is a living document** — revisit it at each stage, and adapt it to your own learning style.
