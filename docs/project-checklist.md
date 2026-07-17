@@ -1,8 +1,7 @@
-# 🧰 React Project Checklist (2025 Edition)
+# 🧰 React Project Checklist
 
 _From zero to production — and beyond._
 
-> ✅ **Last Updated**: November 7, 2025  
 > 🎯 **For**: Solo devs • Teams • Tech leads • Senior engineers  
 > 📦 **Stack-agnostic core**, with Next.js/RSC + Vite paths  
 > 🧪 Inspired by real-world audits of 50+ production React apps
@@ -20,16 +19,16 @@ _From zero to production — and beyond._
 
 ### ✅ Tech Stack Decision
 
-| Decision          | Options                                    | Recommendation (2025)                                                                   |
+| Decision          | Options                                    | Recommendation                                                                          |
 | ----------------- | ------------------------------------------ | --------------------------------------------------------------------------------------- |
 | **App type**      | SPA / MPA / Hybrid                         | → Prefer **MPA + RSC** (Next.js App Router) for most apps                               |
-| **Framework**     | Next.js / Remix / Vite + React Router      | → **Next.js 14.2+** (App Router + Turbopack) unless full control needed                 |
+| **Framework**     | Next.js / Remix / Vite + React Router      | → **Next.js** (App Router + Turbopack) unless full control needed                       |
 | **Styling**       | CSS Modules / Tailwind / CSS-in-JS         | → **Tailwind + `@layer` + `clsx`** (no runtime bloat)                                   |
-| **State**         | Context / Zustand / Jotai / TanStack Store | → **Zustand** for global; **React Query (v5)** for server state                         |
-| **Data Fetching** | `fetch` / SWR / TanStack Query             | → **TanStack Query v5** (supports RSC + streaming)                                      |
+| **State**         | Context / Zustand / Jotai / TanStack Store | → **Zustand** for global; **TanStack Query** for server state                           |
+| **Data Fetching** | `fetch` / SWR / TanStack Query             | → **TanStack Query** (supports RSC + streaming)                                         |
 | **Forms**         | `react-hook-form` + Zod                    | ✅ **RHF + Zod** (type-safe, performant, RSC-compatible)                                |
 | **Testing**       | Vitest / Jest + RTL / Playwright           | → **Vitest + RTL + Playwright E2E**                                                     |
-| **Linting**       | ESLint + Biome (new!)                      | → **Biome** (faster, all-in-one)                                                        |
+| **Linting**       | ESLint / Biome                             | → **Biome** (faster, all-in-one, if adopted) or ESLint + Prettier                       |
 | **TypeScript**    | Strict mode?                               | ✅ `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true` |
 
 ### ✅ Folder Structure (Recommended)
@@ -67,13 +66,12 @@ src/
 - [ ] Add `.gitignore` (include `.next/`, `.turbo/`, `node_modules/`, `.env.local`)
 - [ ] Set up **pre-commit hooks**: `lint-staged` + `husky`
 - [ ] Enable **TypeScript strict checks** (see above)
-- [ ] Add **`.nvmrc`** (e.g., `20.15.0`)
+- [ ] Add **`.nvmrc`** (e.g., `lts/iron` or specific Node version)
 - [ ] Add **`.dockerignore`** & **`Dockerfile`** (multi-stage build)
 
 ### ✅ Developer Experience (DX)
 
-- [ ] Configure **Biome** (`biome init --typescript`) + disable ESLint if using Biome
-- [ ] Add **Prettier** (or let Biome format)
+- [ ] Configure **Biome** (`biome init --typescript`) or ESLint + Prettier
 - [ ] Add **VS Code settings**:
   ```json
   {
@@ -83,7 +81,7 @@ src/
   }
   ```
 - [ ] Set up **React DevTools** (browser extension + inline props in dev)
-- [ ] Add **Storybook** (v8) or **Chromatic** for component dev/docs
+- [ ] Add **Storybook** or **Chromatic** for component dev/docs
 - [ ] Enable **Turbopack** (Next.js) — `next dev --turbo`
 
 ### ✅ Environment & Secrets
@@ -94,10 +92,13 @@ src/
 - [ ] Validate env at runtime:
   ```ts
   // lib/env.ts
+  import { z } from 'zod';
+
   const envSchema = z.object({
     NEXT_PUBLIC_API_URL: z.string().url(),
     DATABASE_URL: z.string().min(1),
   });
+
   export const env = envSchema.parse(process.env);
   ```
 
@@ -145,6 +146,9 @@ src/
 - [ ] **Streaming w/ Suspense**:
   ```tsx
   // app/page.tsx
+  import { Suspense } from "react";
+  import { Posts, PostsSkeleton } from "@/components/features";
+
   export default async function Page() {
     return (
       <Suspense fallback={<PostsSkeleton />}>
@@ -154,13 +158,15 @@ src/
   }
   ```
 
-### ✅ Forms & Validation (2025 Standard)
+### ✅ Forms & Validation
 
 - [ ] Use `react-hook-form` + **Zod resolver**
 - [ ] Server-side validation in **Server Actions** (never trust client!)
 - [ ] Schema shared between client & server:
   ```ts
   // types/forms.ts
+  import { z } from "zod";
+
   export const signUpSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
@@ -189,11 +195,14 @@ src/
 - [ ] **Critical path E2E**:
   ```ts
   // tests/e2e/checkout.spec.ts
+  import { test, expect } from "@playwright/test";
+
   test("user can purchase item", async ({ page }) => {
     await page.goto("/products/123");
     await page.click("text=Add to Cart");
     await page.click("text=Checkout");
-    await fillForm({ email: "test@example.com", card: "4242..." });
+    await page.fill("input[name='email']", "test@example.com");
+    await page.fill("input[name='card']", "4242 4242 4242 4242");
     await page.click("text=Place Order");
     await expect(page.locator("text=Thank you!")).toBeVisible();
   });
@@ -221,13 +230,12 @@ src/
 | **Bundle (JS)**  | ≤250KB (main route) | `source-map-explorer`        |
 | **Image (hero)** | ≤100KB (WebP/AVIF)  | `next/image` or `@vercel/og` |
 
-| [ ] Add **performance regression check** in CI:
-
-```yaml
-# .github/workflows/perf.yml
-- name: Lighthouse
-  run: npx lhci autorun --upload.target=temporary-public-storage
-```
+- [ ] Add **performance regression check** in CI:
+  ```yaml
+  # .github/workflows/perf.yml
+  - name: Lighthouse
+    run: npx lhci autorun --upload.target=temporary-public-storage
+  ```
 
 ---
 
@@ -246,7 +254,6 @@ src/
 - [ ] **Production build check**:
   ```bash
   npm run build && echo "✅ Build succeeded"
-  npx next export  # if static
   ```
 
 ### ✅ Monitoring & Observability
@@ -400,12 +407,6 @@ echo "🚀 All systems go."
 
 ---
 
-📥 **Download this checklist**:  
-🔗 [project-checklist.md on GitHub Gist](https://gist.github.com/...)  
-📥 **VS Code Task**: Save as `.vscode/tasks.json` for one-click run
-
----
-
 _“Checklists seem lowly and simplistic, but they help fill in the nooks and crannies of complex systems.”_  
 — Atul Gawande, _The Checklist Manifesto_
 
@@ -420,3 +421,4 @@ Let me know if you'd like any of these **auto-generated**:
 - 🧪 **Playwright test suite** that validates checklist compliance
 
 Happy building! 🏗️✨
+```
