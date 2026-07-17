@@ -11,11 +11,15 @@ A comprehensive guide to writing clean, maintainable, and performant React appli
 3. [Performance Optimization](#performance-optimization)
 4. [Code Organization](#code-organization)
 5. [Hooks Best Practices](#hooks-best-practices)
-6. [Props & TypeScript](#props--typescript)
-7. [Event Handling](#event-handling)
-8. [Styling](#styling)
-9. [Testing](#testing)
-10. [Security](#security)
+6. [React 19+ Patterns](#react-19-patterns)
+7. [Props & TypeScript](#props--typescript)
+8. [Event Handling](#event-handling)
+9. [Forms](#forms)
+10. [Styling](#styling)
+11. [Accessibility](#accessibility)
+12. [Error Boundaries](#error-boundaries)
+13. [Testing](#testing)
+14. [Security](#security)
 
 ---
 
@@ -65,6 +69,8 @@ function UserDashboard() {
   </UserProvider>
 </ThemeProvider>
 ```
+
+Context is convenient, but it re-renders every consumer on every value change. For frequently-updating values (like mouse position or form state), prefer a dedicated state library or splitting context by concern rather than one large "app context."
 
 ### Prefer Function Components
 
@@ -151,6 +157,18 @@ const [lastName, setLastName] = useState("");
 const fullName = `${firstName} ${lastName}`; // Derived!
 ```
 
+### Separate Server State from Client State
+
+Not all state belongs in `useState`/`useReducer`. Data fetched from an API (server state) has different concerns — caching, revalidation, dedup — than local UI state (a modal being open). Reaching for `useEffect` + `useState` to fetch data works, but a library like TanStack Query or SWR handles caching and race conditions you'd otherwise write by hand.
+
+```jsx
+// Local/UI state — useState is right here
+const [isOpen, setIsOpen] = useState(false);
+
+// Server state — better handled by a data-fetching library
+const { data, isLoading } = useQuery({ queryKey: ["user", id], queryFn: () => fetchUser(id) });
+```
+
 ---
 
 ## Performance Optimization
@@ -179,6 +197,8 @@ const ExpensiveComponent = React.memo(({ data }) => {
 });
 ```
 
+`useMemo`, `useCallback`, and `React.memo` aren't free — they cost a comparison on every render. Reach for them when you've actually measured a re-render problem (e.g. with React DevTools Profiler), not by default on every component and function. Premature memoization adds noise without benefit.
+
 ### Lazy Load Components
 
 ```jsx
@@ -195,7 +215,7 @@ function App() {
 
 ### Virtualize Long Lists
 
-Use libraries like `react-window` or `react-virtualized` for large lists.
+Use libraries like `react-window` or `@tanstack/react-virtual` for large lists.
 
 ```jsx
 import { FixedSizeList } from "react-window";
@@ -263,6 +283,8 @@ export { Card } from "./Card";
 import { Button, Modal, Card } from "./components";
 ```
 
+Barrel files are convenient but can hurt tree-shaking and slow down builds in large apps if every file re-exports through one giant index. Fine for a utils library like this one; worth reconsidering in a large app with a bundler that struggles to tree-shake re-exports.
+
 ---
 
 ## Hooks Best Practices
@@ -290,6 +312,8 @@ function Component({ condition }) {
   }
 }
 ```
+
+Turn on `eslint-plugin-react-hooks` — it catches this class of bug at lint time instead of runtime.
 
 ### Custom Hooks for Reusable Logic
 
@@ -337,6 +361,61 @@ useEffect(() => {
 }, [userId]);
 ```
 
+Let `eslint-plugin-react-hooks`'s `exhaustive-deps` rule flag missing dependencies rather than disabling it — a missing dependency is usually a real bug (stale closures), not noise to suppress.
+
+---
+
+## React 19+ Patterns
+
+### `ref` as a Regular Prop
+
+`forwardRef` is no longer required to receive a `ref` — as of React 19, function components can accept `ref` directly as a prop.
+
+```jsx
+// ✅ React 19 — no forwardRef needed
+function Input({ ref, ...props }) {
+  return <input ref={ref} {...props} />;
+}
+```
+
+### `useActionState` for Form Submissions
+
+Replaces the manual `loading`/`error`/`data` triad for form actions.
+
+```jsx
+const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
+  const result = await submitForm(formData);
+  return result.error ? { error: result.error } : { success: true };
+}, null);
+
+<form action={formAction}>
+  <input name="email" />
+  <button disabled={isPending}>Submit</button>
+</form>;
+```
+
+### `useOptimistic` for Instant UI Feedback
+
+```jsx
+const [optimisticTodos, addOptimisticTodo] = useOptimistic(todos, (state, newTodo) => [
+  ...state,
+  newTodo,
+]);
+```
+
+### The `use()` API
+
+Reads a promise or context value, and can be called conditionally (unlike other hooks) — useful for reading a promise passed from a Server Component or a context inside an `if`.
+
+```jsx
+function Comments({ commentsPromise }) {
+  const comments = use(commentsPromise);
+  return comments.map((c) => <p key={c.id}>{c.text}</p>);
+}
+```
+
+These are additive — existing `useState`/`useReducer`/`useEffect` patterns above remain correct and are still the right tool outside of form-submission and Suspense-driven data flows.
+
 ---
 
 ## Props & TypeScript
@@ -351,19 +430,11 @@ function Button({ label, onClick, variant = "primary" }) {
 }
 ```
 
-### Use PropTypes or TypeScript
+### Use TypeScript (Preferred Over PropTypes)
 
-```jsx
-// With PropTypes
-import PropTypes from "prop-types";
+`PropTypes` only checks at runtime and only in development. TypeScript catches prop mismatches at compile time and gives you editor autocomplete — for any new project, prefer TypeScript over `PropTypes`.
 
-Button.propTypes = {
-  label: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  variant: PropTypes.oneOf(["primary", "secondary"]),
-};
-
-// With TypeScript
+```tsx
 interface ButtonProps {
   label: string;
   onClick: () => void;
@@ -373,6 +444,18 @@ interface ButtonProps {
 function Button({ label, onClick, variant = "primary" }: ButtonProps) {
   return <button onClick={onClick}>{label}</button>;
 }
+```
+
+If you're on an older JS-only codebase, `PropTypes` is still better than nothing:
+
+```jsx
+import PropTypes from "prop-types";
+
+Button.propTypes = {
+  label: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(["primary", "secondary"]),
+};
 ```
 
 ### Spread Props Carefully
@@ -389,15 +472,15 @@ function Button({ label, onClick, variant = "primary" }: ButtonProps) {
 
 ## Event Handling
 
-### Don't Create Functions in Render
+### Don't Create Functions in Render (When It Matters)
 
-**❌ Bad:**
+**❌ Avoid when passed to memoized children or in hot lists:**
 
 ```jsx
 <button onClick={() => handleClick(id)}>Click</button>
 ```
 
-**✅ Good:**
+**✅ Better:**
 
 ```jsx
 const handleClick = useCallback(() => {
@@ -407,6 +490,8 @@ const handleClick = useCallback(() => {
 <button onClick={handleClick}>Click</button>;
 ```
 
+Note: for a plain `<button>` with no memoized child underneath it, an inline arrow function is genuinely fine — React doesn't re-render a DOM node because its handler prop is a new function reference each time. This optimization matters when the handler is passed to a `React.memo`-wrapped component that would otherwise skip re-rendering.
+
 ### Use Event Delegation for Lists
 
 **✅ Good:**
@@ -414,8 +499,8 @@ const handleClick = useCallback(() => {
 ```jsx
 function List({ items }) {
   const handleItemClick = (e) => {
-    const id = e.target.dataset.id;
-    handleClick(id);
+    const id = e.target.closest("[data-id]")?.dataset.id;
+    if (id) handleClick(id);
   };
 
   return (
@@ -429,6 +514,55 @@ function List({ items }) {
   );
 }
 ```
+
+(`closest()` guards against clicks landing on a nested element inside the `<li>` rather than the `<li>` itself.)
+
+---
+
+## Forms
+
+### Controlled Inputs for Validation-Heavy Forms
+
+```jsx
+function LoginForm() {
+  const [email, setEmail] = useState("");
+  const error = email && !email.includes("@") ? "Invalid email" : null;
+
+  return (
+    <>
+      <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      {error && <span role="alert">{error}</span>}
+    </>
+  );
+}
+```
+
+### Uncontrolled Inputs for Simple, High-Volume Forms
+
+For large forms where per-keystroke re-renders are wasteful, uncontrolled inputs with `ref` (or a library like React Hook Form, which uses uncontrolled inputs internally) avoid re-rendering the whole form on every keystroke.
+
+```jsx
+function SimpleForm() {
+  const formRef = useRef(null);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const data = new FormData(formRef.current);
+    submitForm(Object.fromEntries(data));
+  };
+
+  return (
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <input name="email" />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+### Validate on Blur, Not on Every Keystroke
+
+Validating on every keystroke (before the user has finished typing) reads as the form yelling at them. Validate `onBlur`, then re-validate `onChange` only after the first error has been shown.
 
 ---
 
@@ -472,6 +606,105 @@ export function cn(...classes) {
 
 ---
 
+## Accessibility
+
+Accessibility isn't a separate pass at the end — most of it is free if you reach for the right element from the start.
+
+### Use Semantic HTML First
+
+```jsx
+// ❌ Bad: a div pretending to be a button
+<div onClick={handleClick}>Submit</div>
+
+// ✅ Good: a real button — gets keyboard focus, Enter/Space activation, and a11y tree role for free
+<button onClick={handleClick}>Submit</button>
+```
+
+### Label Every Form Control
+
+```jsx
+// ✅ Good
+<label htmlFor="email">Email</label>
+<input id="email" type="email" />
+
+// Or, if a visible label doesn't fit the design:
+<input aria-label="Email" type="email" />
+```
+
+### Manage Focus for Dynamic UI
+
+Modals and dropdowns should trap and restore focus, not just show/hide.
+
+```jsx
+function Modal({ isOpen, onClose, children }) {
+  const closeButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) closeButtonRef.current?.focus();
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+  return (
+    <div role="dialog" aria-modal="true">
+      <button ref={closeButtonRef} onClick={onClose}>
+        Close
+      </button>
+      {children}
+    </div>
+  );
+}
+```
+
+### Announce Dynamic Content
+
+```jsx
+<div role="status" aria-live="polite">
+  {isSaving ? "Saving..." : "Saved"}
+</div>
+```
+
+### Quick Wins
+
+- Every `<img>` gets a meaningful `alt` (or `alt=""` if purely decorative).
+- Interactive elements are reachable and operable by keyboard alone — test by unplugging your mouse.
+- Color isn't the only signal for state (pair a red border with an error icon/text, not just red).
+
+---
+
+## Error Boundaries
+
+Error boundaries catch rendering errors in their child tree and show a fallback UI instead of a blank white screen. They must be class components (there is no hook equivalent yet) — write one once and reuse it.
+
+```jsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    logErrorToService(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? <p>Something went wrong.</p>;
+    }
+    return this.props.children;
+  }
+}
+
+// Usage — scope boundaries to isolate failures, don't wrap only the whole app
+<ErrorBoundary fallback={<DashboardError />}>
+  <Dashboard />
+</ErrorBoundary>;
+```
+
+Note what error boundaries **don't** catch: event handler errors, async code (`setTimeout`, promises), server-side rendering errors, and errors thrown in the boundary itself. Wrap async errors in a try/catch and surface them through normal state instead.
+
+---
+
 ## Testing
 
 ### Write Tests for Critical Paths
@@ -500,6 +733,18 @@ expect(component.state.count).toBe(1);
 
 ```jsx
 expect(screen.getByText("Count: 1")).toBeInTheDocument();
+```
+
+### Query the Way a User Would
+
+Testing Library's query priority favors accessible queries first — this also doubles as an accessibility check.
+
+```jsx
+// Preferred order: role > label > text > testid
+screen.getByRole("button", { name: /submit/i });
+screen.getByLabelText("Email");
+screen.getByText("Welcome");
+screen.getByTestId("submit-btn"); // last resort — no accessible link to the DOM
 ```
 
 ---
@@ -532,14 +777,27 @@ const [creditCard, setCreditCard] = useState("4111-1111-1111-1111");
 const [lastFourDigits, setLastFourDigits] = useState("1111");
 ```
 
-### Use Environment Variables for Secrets
+### Use Environment Variables for Secrets — Correctly
+
+```bash
+# .env — no spaces around `=`, no trailing semicolon, this is not JS
+REACT_APP_API_KEY=your_key_here
+```
 
 ```jsx
-// .env
-REACT_APP_API_KEY = your_key_here;
-
 // Usage
 const apiKey = process.env.REACT_APP_API_KEY;
+```
+
+Anything prefixed `REACT_APP_` (CRA) or `VITE_` (Vite) is bundled into client-side JS and is publicly visible in the browser. Never put a real secret (a server-side API key, a database credential) behind these prefixes — only values that are safe to be public (a publishable Stripe key, a public analytics ID) belong here. True secrets stay server-side.
+
+### Validate External Links
+
+```jsx
+// Prevent the new tab from getting a reference back to your window
+<a href={externalUrl} target="_blank" rel="noopener noreferrer">
+  Visit site
+</a>
 ```
 
 ---
@@ -547,16 +805,18 @@ const apiKey = process.env.REACT_APP_API_KEY;
 ## Quick Checklist
 
 - [ ] Components are small and single-purpose
-- [ ] State is kept close to where it's used
+- [ ] State is kept close to where it's used; server state uses a data-fetching library, not raw `useEffect`
 - [ ] Effects have proper cleanup functions
-- [ ] Dependencies arrays are correct
-- [ ] Expensive calculations are memoized
-- [ ] Lists use proper keys (not index)
-- [ ] No inline function creation in render
-- [ ] Props are validated (PropTypes/TypeScript)
-- [ ] Accessibility attributes added (aria-\*, role)
-- [ ] Error boundaries implemented
-- [ ] Loading and error states handled
+- [ ] Dependencies arrays are correct (enforced by `exhaustive-deps` lint rule)
+- [ ] Expensive calculations are memoized — after measuring, not by default
+- [ ] Lists use stable, unique keys (not array index)
+- [ ] No unnecessary inline function creation passed to memoized children
+- [ ] Props are typed (TypeScript preferred; PropTypes as a fallback)
+- [ ] Semantic HTML used before reaching for ARIA
+- [ ] Interactive elements are keyboard-operable and properly labeled
+- [ ] Error boundaries scoped around risky subtrees, not just the app root
+- [ ] Loading and error states handled explicitly
+- [ ] `.env` secrets are actually server-side secrets, not bundled client values
 - [ ] Code is consistent with team style guide
 
 ---
@@ -566,10 +826,9 @@ const apiKey = process.env.REACT_APP_API_KEY;
 - [React Official Docs](https://react.dev)
 - [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)
 - [Patterns.dev](https://www.patterns.dev/)
+- [Testing Library Docs](https://testing-library.com/docs/queries/about/#priority)
 - [Kent C. Dodds Blog](https://kentcdodds.com/blog)
 
 ---
-
-**Last Updated:** 2025
 
 **Remember:** These are guidelines, not rigid rules. Context matters. Always consider your specific use case, team preferences, and project requirements.
