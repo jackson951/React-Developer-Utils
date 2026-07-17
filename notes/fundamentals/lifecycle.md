@@ -1,169 +1,185 @@
-### 📘 **File:** `notes/fundamentals/lifecycle.md`
-
 # 🔄 React Component Lifecycle
 
-> React components go through **lifecycle stages**: Mounting, Updating, and Unmounting.
-> Function components use **Hooks**, while class components use **lifecycle methods**.
+> Every React component goes through a lifecycle: it’s **mounted** into the DOM, **updated** when state or props change, and **unmounted** when it’s no longer needed.  
+> Function components with Hooks make this explicit, declarative, and easy to reason about.
 
 ---
 
-## 🚀 1. Lifecycle Phases
+## 🚀 1. Lifecycle Phases Overview
 
-| Phase      | Class Methods / Hooks                               | Description                                        |
-| ---------- | --------------------------------------------------- | -------------------------------------------------- |
-| Mounting   | constructor → render → componentDidMount            | Component is created and inserted into the DOM     |
-| Updating   | shouldComponentUpdate → render → componentDidUpdate | Component is re-rendered due to props/state change |
-| Unmounting | componentWillUnmount                                | Component is removed from the DOM                  |
+| Phase      | What happens                                                       | Function Component Hook                             |
+| ---------- | ------------------------------------------------------------------ | --------------------------------------------------- |
+| **Mount**  | Component is created and inserted into the DOM                     | `useEffect(fn, [])`                                 |
+| **Update** | Re-rendered because of new props, state, or context                | `useEffect(fn, [deps])`                             |
+| **Unmount**| Component is removed from the DOM; clean up side effects           | Return a cleanup function from `useEffect`          |
+| **Error**  | A child component throws an error during rendering (class only)    | *(use Error Boundary component)*                    |
+
+> **Historical note**: Class components used lifecycle methods (`componentDidMount`, `componentDidUpdate`, `componentWillUnmount`). All modern code uses Hooks.
 
 ---
 
-## 🧩 2. Mounting Phase
+## 🧩 2. The Mounting Phase
 
-**Class Component Example:**
+Run code **once** after the component is first rendered.
 
-```jsx
-import React, { Component } from "react";
-
-class Timer extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { seconds: 0 };
-    console.log("Constructor: Initialize state");
-  }
-
-  componentDidMount() {
-    console.log("Mounted");
-    this.interval = setInterval(() => {
-      this.setState((prev) => ({ seconds: prev.seconds + 1 }));
-    }, 1000);
-  }
-
-  componentWillUnmount() {
-    console.log("Unmounting...");
-    clearInterval(this.interval);
-  }
-
-  render() {
-    return <p>Seconds: {this.state.seconds}</p>;
-  }
-}
-
-export default Timer;
-```
-
-**Function Component (Hooks) Example:**
-
-```jsx
-import { useState, useEffect } from "react";
+```tsx
+import { useState, useEffect } from 'react';
 
 function Timer() {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => clearInterval(interval); // cleanup on unmount
-  }, []); // empty dependency → run once on mount
+    // This runs after the first render (mount)
+    const interval = setInterval(() => {
+      setSeconds(prev => prev + 1);
+    }, 1000);
+
+    // Optional: clean up when component unmounts
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array → run only on mount
 
   return <p>Seconds: {seconds}</p>;
 }
-
-export default Timer;
 ```
+
+✅ **Use cases**:  
+- Start timers or intervals  
+- Add global event listeners  
+- Fetch initial data (though TanStack Query or Server Components are often better)
 
 ---
 
-## ⚡ 3. Updating Phase
+## ⚡ 3. The Updating Phase
 
-Triggered when **props or state change**.
+React re‑renders a component when its state or props change. Use `useEffect` with a dependency array to run code **after specific values change**.
 
-**Class Component:**
+```tsx
+import { useEffect, useState } from 'react';
 
-```jsx
-componentDidUpdate(prevProps, prevState) {
-  if (prevState.count !== this.state.count) {
-    console.log("Count updated:", this.state.count);
+function DocumentTitle({ count }: { count: number }) {
+  useEffect(() => {
+    document.title = `Count: ${count}`;
+    // No cleanup needed here
+  }, [count]); // Only run when `count` changes
+
+  return <p>{count}</p>;
+}
+```
+
+You can also compare previous and current values inside the effect if needed:
+
+```tsx
+useEffect(() => {
+  console.log(`Count changed from ${prevCount} to ${count}`);
+  // But you'd need a ref to track prevCount – see custom hooks
+}, [count]);
+```
+
+✅ **Use cases**:  
+- Sync with external APIs (browser title, localStorage, etc.)  
+- Log analytics on change  
+- Re‑fetch data when a filter/id changes
+
+---
+
+## 🧱 4. The Unmounting Phase
+
+When a component is removed from the UI, you must **clean up** subscriptions, timers, or event listeners to avoid memory leaks.
+
+The cleanup function returned from `useEffect` handles this.
+
+```tsx
+useEffect(() => {
+  const handleScroll = () => console.log('scrolling');
+  window.addEventListener('scroll', handleScroll);
+
+  // Cleanup runs before unmount *and* before re‑running the effect
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []); // Only on mount/unmount
+```
+
+✅ **Always clean up**:
+- `setInterval` / `setTimeout`
+- `addEventListener` / `removeEventListener`
+- WebSocket / subscription connections
+- Any external mutable side effect
+
+---
+
+## 🧠 5. The Dependency Array (`deps`) – The Key to Correct Effects
+
+| Dependency array        | When does the effect run?                                        |
+| ----------------------- | ---------------------------------------------------------------- |
+| `[]`                    | Only after the **first render** (mount)                          |
+| `[dep1, dep2]`          | After the first render **and** when any dependency changes       |
+| *(no array at all)*     | After **every render** – rarely useful, often a mistake           |
+
+> ⚠️ You **must** include every reactive value (props, state, context) that is used inside the effect. Linting rule `react-hooks/exhaustive-deps` enforces this.
+
+---
+
+## 🌐 6. Splitting Effects for Readability
+
+Don’t cram unrelated logic into one effect. Split them:
+
+```tsx
+useEffect(() => {
+  console.log('Effect A: runs on mount');
+}, []);
+
+useEffect(() => {
+  console.log('Effect B: runs when count changes');
+}, [count]);
+```
+
+✅ This keeps side‑effects isolated and easy to understand.
+
+---
+
+## 🧪 7. Error Boundary (Class-Only, Still Relevant)
+
+`useEffect` does **not** catch errors thrown in child components. For that, you still need an **Error Boundary** (a class component).  
+
+```tsx
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: Error, info: React.ErrorInfo) { /* log to Sentry */ }
+  render() {
+    if (this.state.hasError) return <h2>Something went wrong.</h2>;
+    return this.props.children;
   }
 }
 ```
 
-**Function Component:**
-
-```jsx
-useEffect(() => {
-  console.log("Count updated:", count);
-}, [count]); // dependency array
-```
-
----
-
-## 🧱 4. Unmounting Phase
-
-Triggered when the component is **removed from the DOM**.
-Use this phase for **cleanup** — timers, subscriptions, or event listeners.
-
-```jsx
-useEffect(() => {
-  const id = setInterval(doSomething, 1000);
-  return () => clearInterval(id); // cleanup on unmount
-}, []);
-```
-
----
-
-## 🧠 5. Common Lifecycle Patterns
-
-| Use Case                | Class Method / Hook                              |
-| ----------------------- | ------------------------------------------------ |
-| Fetch data on mount     | componentDidMount / useEffect([], ...)           |
-| Update DOM after render | componentDidUpdate / useEffect([deps])           |
-| Cleanup subscriptions   | componentWillUnmount / useEffect return          |
-| Conditionally re-render | shouldComponentUpdate / React.memo + useCallback |
-
----
-
-## 🔧 6. `useEffect` Dependency Array
-
-* `[]` → run **once on mount**
-* `[dep]` → run when **`dep` changes**
-* *(no array)* → run **after every render** (⚠️ rarely recommended)
-
----
-
-## 🌐 7. Multiple Effects
-
-You can split effects by concern to keep logic clean:
-
-```jsx
-useEffect(() => {
-  console.log("Effect 1 — run once");
-}, []);
-
-useEffect(() => {
-  console.log("Effect 2 — depends on count");
-}, [count]);
-```
+> For more advanced patterns, see the dedicated error boundaries guide.
 
 ---
 
 ## 💡 8. Best Practices
 
-* Prefer **function components with hooks**
-* Always **cleanup** timers, subscriptions, and listeners
-* Use dependency arrays **carefully** in `useEffect`
-* Use `React.memo` and `useCallback` to optimize re-renders
-* Avoid side effects inside `render()` — use `useEffect` instead
+- **Use function components + Hooks only** – classes are legacy.
+- **Keep effects minimal** – move logic to event handlers or custom hooks when possible.
+- **Always clean up subscriptions** – memory leaks are silent killers.
+- **Follow the exhaustive deps rule** – don’t lie about dependencies.
+- **Don’t call Hooks conditionally** – they rely on call order.
+- **Use the React DevTools Profiler** to spot unnecessary re‑renders.
+- **Prefer Server Components or TanStack Query for data fetching** – avoid `useEffect` for typical API calls.
 
 ---
 
 ## 🔗 9. Resources
 
-* [React Docs – State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html)
-* [React Docs – Using the Effect Hook](https://reactjs.org/docs/hooks-effect.html)
-* [React Patterns – Lifecycle with Hooks](https://reactpatterns.com/#useeffect)
+- [React Docs: Synchronizing with Effects](https://react.dev/learn/synchronizing-with-effects)
+- [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
+- [Lifecycle of Reactive Effects](https://react.dev/learn/lifecycle-of-reactive-effects)
+- [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks)
 
 ---
 
 ✅ **Summary**
 
-> React lifecycle controls **how and when components mount, update, and unmount**.
-> Hooks like `useEffect` replace class lifecycle methods, making **function components the modern standard**.
+> The modern React lifecycle is centered around `useEffect` and its dependency array.  
+> **Mount, update, and unmount** are no longer hidden magic methods – they are explicit, composable, and testable.  
+> Mastering this mental model unlocks predictable, bug‑free React code.
+```
