@@ -1,13 +1,12 @@
 # ⚡ `performance.md`
 
-_React Performance: From Theory to Production (2025 Edition)_
+_React Performance: From Theory to Production_
 
-> ✅ **Last Updated**: November 7, 2025  
 > 📌 **TL;DR**:
 >
 > - **Profile before optimizing** — 80% of “perf work” is unnecessary.
 > - **Bundle size**, **re-renders**, and **hydration** are the big 3 bottlenecks.
-> - In 2025: Leverage **React Compiler (auto-memo)**, **RSC streaming**, and **`useOptimistic`**.
+> - Leverage modern features: React Compiler (auto-memo), RSC streaming, and `useOptimistic`.
 > - Never sacrifice DX or maintainability for micro-optimizations.
 
 ---
@@ -90,7 +89,7 @@ _React Performance: From Theory to Production (2025 Edition)_
 > const config = useMemo(() => ({ theme, lang }), [theme, lang]);
 > ```
 
-> ✅ **React Compiler (2025+)**:  
+> ✅ **React Compiler**:
 > Opt-in to [React Compiler](https://react.dev/blog/2024/12/05/react-compiler-private-beta) → **automatic memoization** → delete 90% of `useCallback`/`useMemo`.
 
 ---
@@ -181,7 +180,7 @@ export default function Page() {
 - Reduces bundle size via inlining
 - ✅ Opt-in via `@react/compiler` + `vite-plugin-react-compiler`
 
-> 📝 _Status (Nov 2025)_: Private beta → public GA expected Q1 2026. Start experimenting now.
+> 📝 _Status_: Private beta moving toward GA — start experimenting now.
 
 ---
 
@@ -213,7 +212,7 @@ Add to GitHub Actions:
 
 ---
 
-## 🧪 Common Anti-Patterns (2025 Edition)
+## 🧪 Common Anti-Patterns
 
 | Anti-Pattern                              | Why Bad                           | Fix                                           |
 | ----------------------------------------- | --------------------------------- | --------------------------------------------- |
@@ -231,12 +230,11 @@ Add to GitHub Actions:
 - 🛠️ [React DevTools Profiler Guide](https://legacy.reactjs.org/blog/2018/09/10/introducing-the-react-profiler.html)
 - 📊 [Web Vitals](https://web.dev/vitals/)
 - 🧪 [React Compiler Playground](https://react.github.io/compiler/)
-- 📺 [React Performance Deep Dive (2025)](https://www.youtube.com/watch?v=7SJ6n7NqVJ4)
+- 📺 [React Performance Deep Dive](https://www.youtube.com/watch?v=7SJ6n7NqVJ4)
 
 ---
 
 > 💡 **Final Thought**:  
 > _“Performance isn’t a feature — it’s respect for your users’ time, battery, and data plans.”_  
 > — Prioritize **perceived performance** (instant feedback) over raw metrics.
-
----
+```
