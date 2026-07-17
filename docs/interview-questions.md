@@ -18,6 +18,8 @@ A comprehensive collection of React interview questions from beginner to advance
 10. [Real-World Scenarios](#real-world-scenarios)
 11. [Architecture & Best Practices](#architecture--best-practices)
 12. [React 18 Features](#react-18-features)
+13. [Advanced Patterns](#advanced-patterns)
+14. [React 19 Features](#react-19-features)
 
 ---
 
@@ -47,13 +49,13 @@ function Greeting({ name }) {
 ### Q2: What is JSX?
 
 **Answer:**
-JSX (JavaScript XML) is a syntax extension that allows writing HTML-like code in JavaScript. It's syntactic sugar for `React.createElement()`.
+JSX (JavaScript XML) is a syntax extension that allows writing HTML-like code in JavaScript. It's syntactic sugar for `React.createElement()` (compiled today via the `jsx` runtime, `_jsx()`, rather than `createElement` directly — same idea, slightly different output).
 
 ```jsx
 // JSX
 const element = <h1 className="greeting">Hello!</h1>;
 
-// Compiles to:
+// Conceptually compiles to:
 const element = React.createElement(
   'h1',
   { className: 'greeting' },
@@ -62,7 +64,7 @@ const element = React.createElement(
 ```
 
 **Rules:**
-- Must return single parent element
+- Must return a single root element (or a Fragment `<>...</>`)
 - Use `className` instead of `class`
 - Use `camelCase` for attributes (onClick, onChange)
 - Close all tags (`<img />`, `<br />`)
@@ -189,7 +191,7 @@ function UncontrolledInput() {
 
 **When to use:**
 - Controlled: Most cases, when you need validation, conditional rendering
-- Uncontrolled: File inputs, integrating with non-React code
+- Uncontrolled: File inputs, integrating with non-React code, large forms where per-keystroke re-renders matter
 
 ---
 
@@ -283,6 +285,8 @@ function Component() {
 - **Updating**: render → componentDidUpdate
 - **Unmounting**: componentWillUnmount
 
+**Note on StrictMode:** in development, React 18+'s `<StrictMode>` intentionally mounts, unmounts, then remounts every component once (running effects twice) to surface missing cleanup functions. This is dev-only behavior — production runs effects once — but it trips people up if they don't know it's expected.
+
 ---
 
 ### Q10: What happens when setState is called?
@@ -296,17 +300,17 @@ function Component() {
 
 **Important:**
 - setState is asynchronous
-- Multiple setState calls may be batched
+- Multiple setState calls are batched — as of React 18, this batching happens everywhere (event handlers, promises, timeouts, native event handlers), not just inside React event handlers as in React 17 and earlier
 - Use functional form for state that depends on previous state
 
 ```jsx
 // ❌ Wrong
 setCount(count + 1);
-setCount(count + 1); // Still increments by 1
+setCount(count + 1); // Still increments by 1 — both read the same stale `count`
 
 // ✅ Correct
 setCount(prev => prev + 1);
-setCount(prev => prev + 1); // Increments by 2
+setCount(prev => prev + 1); // Increments by 2 — each reads the latest pending value
 ```
 
 ---
@@ -363,12 +367,11 @@ const [count, setCount] = useState(0);
 // Object
 const [user, setUser] = useState({ name: '', age: 0 });
 
-// Lazy initialization (expensive computation)
-const [data, setData] = useState(() => {
-  return expensiveCalculation();
-});
+// Lazy initialization (expensive computation) — pass a function, not the call itself,
+// so the computation only runs once on mount, not on every render
+const [data, setData] = useState(() => expensiveCalculation());
 
-// Updating objects (must spread)
+// Updating objects (must spread — setState replaces, it doesn't merge, unlike class setState)
 setUser(prev => ({ ...prev, name: 'Alice' }));
 ```
 
@@ -402,7 +405,7 @@ useEffect(() => {
   fetchUserData(userId);
 }, [userId]);
 
-// Run on every render
+// Run on every render (rare — usually a sign something belongs in the render body instead)
 useEffect(() => {
   console.log('Component rendered');
 });
@@ -413,6 +416,8 @@ useEffect(() => {
   return () => clearInterval(timer);
 }, []);
 ```
+
+For fetching data specifically, prefer a library (TanStack Query, SWR) or a framework's built-in data layer over raw `useEffect` — it's easy to under-handle race conditions (see Q32) by hand.
 
 ---
 
@@ -447,6 +452,8 @@ function ThemedButton() {
   );
 }
 ```
+
+(React 19 also allows rendering `<ThemeContext>` directly as a provider, without the `.Provider` — see Q49.)
 
 ---
 
@@ -483,22 +490,25 @@ function Component() {
 ### Q16: What is useCallback?
 
 **Answer:**
-`useCallback` memoizes functions to prevent unnecessary re-renders.
+`useCallback` memoizes a function reference so it doesn't get recreated on every render — useful when that function is passed to a `React.memo`-wrapped child, since a new reference would otherwise defeat the memoization.
 
 ```jsx
-function Parent() {
+// Without useCallback: a brand-new function every render,
+// which breaks memo() on Child below
+function ParentWithoutMemo() {
   const [count, setCount] = useState(0);
-  
-  // Without useCallback: new function on every render
-  const handleClick = () => {
-    console.log('clicked');
-  };
-  
-  // With useCallback: same function reference
+  const handleClick = () => console.log('clicked');
+  return <Child onClick={handleClick} />;
+}
+
+// With useCallback: same function reference across renders
+// (as long as deps don't change), so Child can actually skip re-rendering
+function ParentWithMemo() {
+  const [count, setCount] = useState(0);
   const handleClick = useCallback(() => {
     console.log('clicked');
   }, []); // Only recreates if dependencies change
-  
+
   return <Child onClick={handleClick} />;
 }
 
@@ -513,7 +523,7 @@ const Child = memo(({ onClick }) => {
 ### Q17: What is useMemo?
 
 **Answer:**
-`useMemo` memoizes expensive calculations.
+`useMemo` memoizes an expensive **computed value**.
 
 ```jsx
 function Component({ a, b }) {
@@ -527,12 +537,15 @@ function Component({ a, b }) {
 ```
 
 **useMemo vs useCallback:**
-- `useMemo`: Memoizes **values**
-- `useCallback`: Memoizes **functions**
+- `useMemo(fn, deps)` calls `fn` and memoizes its **return value**
+- `useCallback(fn, deps)` memoizes **`fn` itself**, without calling it
+
+They're related: `useCallback(fn, deps)` is equivalent to `useMemo(() => fn, deps)` — a `useMemo` whose factory just returns the function unchanged, rather than a computed result.
 
 ```jsx
-useMemo(() => fn, deps)      // Returns fn() result
-useCallback(fn, deps)        // Returns fn itself
+useCallback(fn, deps)        // memoizes and returns fn itself
+useMemo(() => fn, deps)      // equivalent — the factory returns fn, not fn()
+useMemo(() => fn(), deps)    // different! this calls fn and memoizes its result
 ```
 
 ---
@@ -571,6 +584,8 @@ function Component() {
   });
 }
 ```
+
+Install `eslint-plugin-react-hooks` — it catches most violations of this rule automatically, which is why it's rarely a bug in practice on a properly-linted codebase.
 
 ---
 
@@ -666,22 +681,25 @@ import { FixedSizeList } from 'react-window';
 {items.map(item => <Item key={item.id} {...item} />)}
 ```
 
-**8. Avoid inline functions in render**
+**8. Avoid inline functions where it actually matters**
 ```jsx
-// ❌ Bad
+// Fine on a plain DOM element — no memo() below it to break
 <button onClick={() => handleClick(id)}>
 
-// ✅ Good
+// Matters when passed to a memoized child, since a new reference each render
+// defeats the memoization
 const onClick = useCallback(() => handleClick(id), [id]);
-<button onClick={onClick}>
+<MemoizedChild onClick={onClick}>
 ```
+
+A good interview answer here isn't "always memoize" — it's "measure with the Profiler first, then apply the specific technique that addresses the measured bottleneck." Over-memoizing has its own cost (extra comparisons on every render) and is a common junior mistake to over-correct into.
 
 ---
 
 ### Q21: What is React.memo?
 
 **Answer:**
-`React.memo` is a higher-order component that memoizes component output based on props.
+`React.memo` is a higher-order component that memoizes component output based on props — it skips re-rendering if props are shallow-equal to the last render.
 
 ```jsx
 const MyComponent = memo(function MyComponent({ name }) {
@@ -699,9 +717,9 @@ const MyComponent = memo(({ data }) => {
 ```
 
 **When to use:**
-- Pure components that render often
+- Pure components that render often with the same props
 - Components with expensive rendering
-- Components with same props frequently
+- Paired with `useCallback`/`useMemo` upstream — otherwise new prop references each render make `memo` a no-op
 
 ---
 
@@ -735,6 +753,8 @@ const [items, setItems] = useState(['A', 'B', 'C']);
 // With index keys: C becomes key=1 (was 2), causes wrong state
 // With ID keys: C keeps its identity
 ```
+
+Index keys are acceptable only when the list is static and never reordered/filtered — e.g. a hard-coded list rendered once. For anything dynamic, use a stable ID.
 
 ---
 
@@ -771,14 +791,14 @@ function UserProfile() {
 - Theme data
 - User authentication
 - Language preferences
-- NOT for frequent updates (use state management library)
+- NOT for frequent updates (use state management library) — every value change re-renders every consumer
 
 ---
 
 ### Q24: What are Error Boundaries?
 
 **Answer:**
-Error Boundaries catch JavaScript errors in child components and display fallback UI.
+Error Boundaries catch JavaScript errors during rendering in child components and display fallback UI.
 
 ```jsx
 class ErrorBoundary extends React.Component {
@@ -812,8 +832,9 @@ class ErrorBoundary extends React.Component {
 
 **Limitations:**
 - Only class components (no hook equivalent yet)
-- Don't catch errors in event handlers
+- Don't catch errors in event handlers (use try/catch there instead)
 - Don't catch errors in async code
+- Don't catch errors thrown in the boundary component itself
 
 ---
 
@@ -828,7 +849,7 @@ function withAuth(Component) {
     const { user } = useAuth();
     
     if (!user) {
-      return <Redirect to="/login" />;
+      return <Navigate to="/login" />;
     }
     
     return <Component {...props} user={user} />;
@@ -849,10 +870,12 @@ function useAuth() {
 
 function Dashboard() {
   const user = useAuth();
-  if (!user) return <Redirect to="/login" />;
+  if (!user) return <Navigate to="/login" />;
   return <div>Dashboard</div>;
 }
 ```
+
+HOCs still show up in older codebases and some libraries, but for new code, custom hooks are almost always the more direct tool — worth knowing HOCs exist and why hooks largely replaced them (no wrapper hell, no prop name collisions, no `ref` forwarding gymnastics).
 
 ---
 
@@ -881,11 +904,6 @@ function Mouse({ render }) {
 <Mouse render={({ x, y }) => (
   <div>Mouse at {x}, {y}</div>
 )} />
-
-// Or with children
-<Mouse>
-  {({ x, y }) => <div>Mouse at {x}, {y}</div>}
-</Mouse>
 ```
 
 **Modern Alternative:** Custom Hooks
@@ -938,6 +956,8 @@ function Modal({ children, isOpen }) {
 - Dropdowns
 - Notifications
 
+Note: events still bubble through the React tree (not the DOM tree) for portalled content — a click inside a portal will still trigger an `onClick` on a React-tree ancestor, even though the DOM node lives elsewhere.
+
 ---
 
 ### Q28: Fragments - Why use them?
@@ -974,6 +994,8 @@ function Component() {
   </Fragment>
 ))}
 ```
+
+(The shorthand `<>...</>` can't take a `key` — use the explicit `<Fragment key={...}>` whenever you're mapping.)
 
 ---
 
@@ -1024,6 +1046,8 @@ function LoginButton() {
 }
 ```
 
+Recent React Router versions (v6.4+/v7) also support a data-loading API (`loader`, `action` per route, `useLoaderData()`) that moves data fetching out of components and into the route definition — worth mentioning if the interviewer is probing for current router knowledge rather than just the basics above.
+
 ---
 
 ## State Management
@@ -1038,18 +1062,18 @@ function LoginButton() {
 - Good for low-frequency updates (theme, auth)
 - Can cause unnecessary re-renders
 
-**Redux:**
+**Redux (via Redux Toolkit today, not hand-rolled Redux):**
 - Predictable state management
-- DevTools for debugging
+- DevTools for debugging (time-travel, action log)
 - Middleware support
-- Better for complex state logic
-- More boilerplate
+- Better for complex, cross-cutting state logic
+- Redux Toolkit (`@reduxjs/toolkit`) is the officially recommended way to write Redux now — it removes most of the boilerplate the classic pattern required (see Q45)
 
 ```jsx
 // Context (simple state)
 const ThemeContext = createContext();
 
-// Redux (complex state)
+// Redux Toolkit (complex state)
 const store = configureStore({
   reducer: {
     user: userReducer,
@@ -1069,7 +1093,6 @@ const store = configureStore({
 
 ```jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 // Component
 function Counter() {
@@ -1087,7 +1110,6 @@ test('increments counter', () => {
   render(<Counter />);
   
   const button = screen.getByRole('button', { name: /increment/i });
-  const count = screen.getByText(/count: 0/i);
   
   fireEvent.click(button);
   
@@ -1105,6 +1127,8 @@ test('loads data', async () => {
   });
 });
 ```
+
+Testing Library's philosophy — query by role/label/text the way a user would, not by internal state or implementation detail — is itself a common interview talking point; be ready to explain *why* (tests stay valid through refactors that don't change behavior).
 
 ---
 
@@ -1147,7 +1171,7 @@ function UserProfile({ userId }) {
     fetchUser();
     
     return () => {
-      cancelled = true; // Cleanup
+      cancelled = true; // Cleanup — prevents setting state from a stale/out-of-order request
     };
   }, [userId]);
   
@@ -1159,7 +1183,7 @@ function UserProfile({ userId }) {
 }
 ```
 
-**Better approach with TanStack Query:**
+**Better approach with TanStack Query** (handles caching, race conditions, and refetching for you — this is the answer to lead with in an interview if asked "how would you actually do this in production"):
 ```jsx
 function UserProfile({ userId }) {
   const { data, isLoading, error } = useQuery({
@@ -1185,7 +1209,6 @@ function SearchComponent() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   
-  // Debounce hook
   const debouncedQuery = useDebounce(query, 500);
   
   useEffect(() => {
@@ -1384,44 +1407,22 @@ function SignupForm() {
 }
 ```
 
-**Better approach with Formik:**
+**Better approach with React Hook Form** (uncontrolled by default — fewer re-renders on large forms — and the current default recommendation over Formik for new projects):
 ```jsx
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { useForm } from 'react-hook-form';
 
 function SignupForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const onSubmit = (data) => console.log(data);
+
   return (
-    <Formik
-      initialValues={{ email: '', password: '', confirmPassword: '' }}
-      validate={values => {
-        const errors = {};
-        if (!values.email) {
-          errors.email = 'Required';
-        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-          errors.email = 'Invalid email address';
-        }
-        return errors;
-      }}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          alert(JSON.stringify(values, null, 2));
-          setSubmitting(false);
-        }, 400);
-      }}
-    >
-      {({ isSubmitting }) => (
-        <Form>
-          <Field type="email" name="email" />
-          <ErrorMessage name="email" component="div" />
-          
-          <Field type="password" name="password" />
-          <ErrorMessage name="password" component="div" />
-          
-          <button type="submit" disabled={isSubmitting}>
-            Submit
-          </button>
-        </Form>
-      )}
-    </Formik>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register('email', { required: 'Required', pattern: /\S+@\S+\.\S+/ })} />
+      {errors.email && <span>{errors.email.message}</span>}
+
+      <button type="submit">Submit</button>
+    </form>
   );
 }
 ```
@@ -1478,7 +1479,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Check existing auth
     const token = localStorage.getItem('token');
     if (token) {
       verifyToken(token).then(userData => {
@@ -1501,12 +1501,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
   
-  const value = {
-    user,
-    login,
-    logout,
-    loading
-  };
+  const value = { user, login, logout, loading };
   
   return (
     <AuthContext.Provider value={value}>
@@ -1538,20 +1533,9 @@ function ProtectedRoute({ children }) {
   
   return user ? children : null;
 }
-
-// Usage
-<Routes>
-  <Route path="/login" element={<Login />} />
-  <Route 
-    path="/dashboard" 
-    element={
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    } 
-  />
-</Routes>
 ```
+
+A note worth raising in interview: storing tokens in `localStorage` is convenient but exposed to XSS. An `HttpOnly` cookie (set by the server) is the more defensible choice for the auth token itself when the threat model includes untrusted third-party scripts.
 
 ---
 
@@ -1619,8 +1603,7 @@ const prefetchSettings = () => {
 **Answer:**
 
 ```jsx
-// Error boundary for runtime errors
-class ErrorBoundary extends Component {
+class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
   
   static getDerivedStateFromError(error) {
@@ -1629,7 +1612,6 @@ class ErrorBoundary extends Component {
   
   componentDidCatch(error, errorInfo) {
     console.error('Error caught:', error, errorInfo);
-    // Send to error reporting service
     logErrorToService(error, errorInfo);
   }
   
@@ -1638,9 +1620,6 @@ class ErrorBoundary extends Component {
       return (
         <div>
           <h2>Something went wrong</h2>
-          <details>
-            {this.state.error && this.state.error.toString()}
-          </details>
           <button onClick={() => this.setState({ hasError: false })}>
             Try again
           </button>
@@ -1660,10 +1639,8 @@ function useApiErrorHandler() {
     setError(error);
     
     if (error.response?.status === 401) {
-      // Redirect to login
       window.location.href = '/login';
     } else if (error.response?.status >= 500) {
-      // Show server error message
       toast.error('Server error. Please try again later.');
     }
   };
@@ -1671,21 +1648,6 @@ function useApiErrorHandler() {
   const clearError = () => setError(null);
   
   return { error, handleError, clearError };
-}
-
-// Usage in components
-function UserProfile() {
-  const { handleError } = useApiErrorHandler();
-  
-  const fetchUser = async () => {
-    try {
-      await api.getUser();
-    } catch (error) {
-      handleError(error);
-    }
-  };
-  
-  // ...
 }
 ```
 
@@ -1697,9 +1659,8 @@ function UserProfile() {
 
 **Answer:**
 
-**1. Concurrent Features:**
+**1. Concurrent Rendering root API:**
 ```jsx
-// Create root with concurrent features
 import { createRoot } from 'react-dom/client';
 
 const container = document.getElementById('root');
@@ -1707,16 +1668,7 @@ const root = createRoot(container);
 root.render(<App />);
 ```
 
-**2. Automatic Batching:**
-```jsx
-// Before: only React events were batched
-// After: all promises, timeouts, etc. are batched
-setTimeout(() => {
-  setCount(c => c + 1);
-  setFlag(f => !f);
-  // React 18: only one re-render
-}, 1000);
-```
+**2. Automatic Batching everywhere** (see Q10)
 
 **3. Transitions:**
 ```jsx
@@ -1731,7 +1683,6 @@ function SearchBox() {
     const value = e.target.value;
     setQuery(value);
     
-    // Mark non-urgent state updates as transitions
     startTransition(() => {
       setResults(searchAPI(value));
     });
@@ -1747,34 +1698,9 @@ function SearchBox() {
 }
 ```
 
-**4. Suspense Improvements:**
+**4. New Hooks:**
 ```jsx
-function App() {
-  return (
-    <Suspense fallback={<BigSpinner />}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route 
-              path="projects" 
-              element={
-                <Suspense fallback={<SmallSpinner />}>
-                  <Projects />
-                </Suspense>
-              } 
-            />
-          </Route>
-        </Routes>
-      </Router>
-    </Suspense>
-  );
-}
-```
-
-**5. New Hooks:**
-```jsx
-// useId - for generating unique IDs
+// useId - for generating unique, hydration-safe IDs
 function Checkbox() {
   const id = useId();
   return (
@@ -1785,19 +1711,9 @@ function Checkbox() {
   );
 }
 
-// useSyncExternalStore - for external stores
+// useSyncExternalStore - for subscribing to external (non-React) stores safely
 function useOnlineStatus() {
-  const isOnline = useSyncExternalStore(subscribe, getSnapshot);
-  return isOnline;
-}
-
-// useInsertionEffect - for CSS-in-JS libraries
-function useCSS(rule) {
-  useInsertionEffect(() => {
-    // Inject CSS rules
-    styleSheet.insertRule(rule);
-  });
-  return rule;
+  return useSyncExternalStore(subscribe, getSnapshot);
 }
 ```
 
@@ -1806,31 +1722,21 @@ function useCSS(rule) {
 ### Q41: What are Concurrent Features?
 
 **Answer:**
-Concurrent React allows rendering to be interruptible, enabling better user experience.
+Concurrent React allows rendering to be interruptible, enabling better user experience under load.
 
 **Key Concepts:**
 - **Suspense**: Declaratively specify loading states
-- **Transitions**: Distinguish between urgent and non-urgent updates
-- **Batching**: Group multiple state updates into single re-render
+- **Transitions**: Distinguish between urgent (typing) and non-urgent (results list) updates
+- **Batching**: Group multiple state updates into a single re-render
 
 ```jsx
-function App() {
-  const [resource, setResource] = useState(initialResource);
-  
-  return (
-    <Suspense fallback={<h1>Loading...</h1>}>
-      <Profile resource={resource} />
-    </Suspense>
-  );
-}
-
-// With startTransition for non-urgent updates
 function TabContainer() {
   const [tab, setTab] = useState('home');
+  const [isPending, startTransition] = useTransition();
   
   function selectTab(nextTab) {
     startTransition(() => {
-      setTab(nextTab); // Non-urgent update
+      setTab(nextTab); // Non-urgent update — UI stays responsive while it processes
     });
   }
   
@@ -1873,25 +1779,9 @@ app.get('*', (req, res) => {
     }
   });
 });
-
-// Using Suspense in SSR
-function App() {
-  return (
-    <html>
-      <body>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Comments />
-        </Suspense>
-      </body>
-    </html>
-  );
-}
-
-function Comments() {
-  const comments = use(fetchComments()); // Note: use() is experimental
-  return comments.map(comment => <div key={comment.id}>{comment.text}</div>);
-}
 ```
+
+In practice today, most teams reach for a framework (Next.js, React Router's framework mode) rather than hand-rolling `renderToPipeableStream` — worth knowing the primitive exists, but the framework-level answer is usually the more relevant one in an interview about production SSR.
 
 ---
 
@@ -1900,34 +1790,25 @@ function Comments() {
 ### Q43: Compound Components Pattern
 
 **Answer:**
-Compound components are components that work together as a group.
+Compound components are components that work together as a group, sharing implicit state through context.
 
 ```jsx
-// Select component
 const SelectContext = createContext();
 
 function Select({ children, value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   
-  const contextValue = {
-    value,
-    onChange,
-    isOpen,
-    setIsOpen
-  };
+  const contextValue = { value, onChange, isOpen, setIsOpen };
   
   return (
     <SelectContext.Provider value={contextValue}>
-      <div className="select">
-        {children}
-      </div>
+      <div className="select">{children}</div>
     </SelectContext.Provider>
   );
 }
 
 function Option({ children, value }) {
   const { value: selectedValue, onChange, setIsOpen } = useContext(SelectContext);
-  
   const isSelected = selectedValue === value;
   
   const handleClick = () => {
@@ -1936,10 +1817,7 @@ function Option({ children, value }) {
   };
   
   return (
-    <div 
-      className={`option ${isSelected ? 'selected' : ''}`}
-      onClick={handleClick}
-    >
+    <div className={`option ${isSelected ? 'selected' : ''}`} onClick={handleClick}>
       {children}
     </div>
   );
@@ -1947,27 +1825,21 @@ function Option({ children, value }) {
 
 function Trigger() {
   const { value, isOpen, setIsOpen } = useContext(SelectContext);
-  
   return (
-    <div 
-      className="trigger"
-      onClick={() => setIsOpen(!isOpen)}
-    >
+    <div className="trigger" onClick={() => setIsOpen(!isOpen)}>
       {value || 'Select...'}
     </div>
   );
 }
 
+Select.Option = Option;
+Select.Trigger = Trigger;
+
 // Usage
 <Select value={selected} onChange={setSelected}>
-  <Trigger />
-  {isOpen && (
-    <div className="options">
-      <Option value="apple">Apple</Option>
-      <Option value="banana">Banana</Option>
-      <Option value="orange">Orange</Option>
-    </div>
-  )}
+  <Select.Trigger />
+  <Select.Option value="apple">Apple</Select.Option>
+  <Select.Option value="banana">Banana</Select.Option>
 </Select>
 ```
 
@@ -1984,18 +1856,15 @@ function DataFetcher({ url, render }) {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        setData(data);
-        setLoading(false);
-      });
+    fetch(url).then(res => res.json()).then(data => {
+      setData(data);
+      setLoading(false);
+    });
   }, [url]);
   
   return render({ data, loading });
 }
 
-// Usage
 <DataFetcher
   url="/api/users"
   render={({ data, loading }) => (
@@ -2011,25 +1880,23 @@ function useData(url) {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        setData(data);
-        setLoading(false);
-      });
+    fetch(url).then(res => res.json()).then(data => {
+      setData(data);
+      setLoading(false);
+    });
   }, [url]);
   
   return { data, loading };
 }
 
-// Usage
 function UserList() {
   const { data, loading } = useData('/api/users');
-  
   if (loading) return <div>Loading...</div>;
   return <div>{data.map(user => <div key={user.id}>{user.name}</div>)}</div>;
 }
 ```
+
+Custom hooks won out because they compose without nesting — three render-prop components wrapping each other becomes unreadable ("wrapper hell"), while three custom hooks are just three lines at the top of a function.
 
 ---
 
@@ -2042,7 +1909,6 @@ function UserList() {
 function Form() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  // Simple local state
 }
 ```
 
@@ -2050,7 +1916,6 @@ function Form() {
 ```jsx
 function Parent() {
   const [sharedData, setSharedData] = useState(null);
-  
   return (
     <>
       <ChildA data={sharedData} onUpdate={setSharedData} />
@@ -2067,51 +1932,35 @@ const AppStateContext = createContext();
 function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState('light');
-  
-  const value = {
-    user,
-    setUser,
-    theme,
-    setTheme
-  };
-  
-  return (
-    <AppStateContext.Provider value={value}>
-      {children}
-    </AppStateContext.Provider>
-  );
+  const value = { user, setUser, theme, setTheme };
+  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }
 ```
 
-**4. Redux Pattern:**
+**4. Redux Toolkit** (the current standard way to write Redux — not the old hand-rolled `switch`-statement reducer pattern):
 ```jsx
-// Actions
-const increment = () => ({ type: 'INCREMENT' });
+import { createSlice, configureStore } from '@reduxjs/toolkit';
 
-// Reducer
-function counter(state = 0, action) {
-  switch (action.type) {
-    case 'INCREMENT':
-      return state + 1;
-    default:
-      return state;
-  }
-}
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { value: 0 },
+  reducers: {
+    increment: (state) => { state.value += 1; }, // Immer under the hood — "mutation" here is safe
+    decrement: (state) => { state.value -= 1; },
+  },
+});
 
-// Component
+export const { increment, decrement } = counterSlice.actions;
+const store = configureStore({ reducer: { counter: counterSlice.reducer } });
+
 function Counter() {
-  const count = useSelector(state => state.counter);
+  const count = useSelector((state) => state.counter.value);
   const dispatch = useDispatch();
-  
-  return (
-    <button onClick={() => dispatch(increment())}>
-      Count: {count}
-    </button>
-  );
+  return <button onClick={() => dispatch(increment())}>Count: {count}</button>;
 }
 ```
 
-**5. Zustand (Simpler alternative):**
+**5. Zustand (lighter-weight alternative, less boilerplate than Redux):**
 ```jsx
 import { create } from 'zustand';
 
@@ -2129,9 +1978,68 @@ function Counter() {
 
 ---
 
+## React 19 Features
+
+### Q46: What's new in React 19?
+
+**Answer:**
+
+**1. Actions and `useActionState`** — first-class support for async transitions tied to forms, replacing the manual `loading`/`error`/`data` state triad:
+```jsx
+const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
+  const result = await updateName(formData.get('name'));
+  return result.error ? { error: result.error } : { success: true };
+}, null);
+
+<form action={formAction}>
+  <input name="name" />
+  <button disabled={isPending}>Update</button>
+</form>
+```
+
+**2. `useOptimistic`** — show an optimistic UI state while an async action is in flight, automatically reverting on failure:
+```jsx
+const [optimisticName, setOptimisticName] = useOptimistic(name);
+
+async function submitAction(formData) {
+  const newName = formData.get('name');
+  setOptimisticName(newName);
+  await updateName(newName);
+}
+```
+
+**3. `use()`** — reads a promise or context value, and unlike other hooks it can be called conditionally or in a loop:
+```jsx
+function Comments({ commentsPromise }) {
+  const comments = use(commentsPromise); // Suspends until resolved
+  return comments.map((c) => <p key={c.id}>{c.text}</p>);
+}
+```
+
+**4. `ref` as a plain prop** — `forwardRef` is no longer required for function components to accept a `ref`:
+```jsx
+function Input({ ref, ...props }) {
+  return <input ref={ref} {...props} />;
+}
+```
+
+**5. Simplified Context provider syntax** — a context object can be rendered directly, without `.Provider`:
+```jsx
+const ThemeContext = createContext('light');
+
+// React 19
+<ThemeContext value="dark">
+  <App />
+</ThemeContext>
+```
+
+**6. The React Compiler** — a build-time tool (currently opt-in) that automatically memoizes components and values, aiming to make manual `useMemo`/`useCallback`/`React.memo` largely unnecessary. Understanding *why* memoization is needed (Q16/Q17/Q20/Q21) is still the fundamental interview knowledge — the compiler automates applying it, it doesn't remove the underlying concept.
+
+---
+
 ## Final Tips for React Interviews
 
-### Q46: Common Interview Mistakes to Avoid
+### Q47: Common Interview Mistakes to Avoid
 
 **Answer:**
 
@@ -2144,7 +2052,7 @@ function Counter() {
 
 3. **Not knowing when to use useMemo/useCallback**
    - Don't over-optimize
-   - Use when there are actual performance issues
+   - Use when there are actual, measured performance issues
 
 4. **Poor component structure**
    - Follow single responsibility principle
@@ -2152,38 +2060,21 @@ function Counter() {
 
 5. **Not testing your code**
    - Be familiar with testing approaches
-   - Understand what to test
+   - Understand what to test (behavior, not implementation)
 
-### Q47: How to approach React coding challenges?
+6. **Answering with outdated patterns**
+   - If asked "how would you fetch data" or "how would you manage state," lead with the current standard (TanStack Query, Redux Toolkit) and mention the manual approach as the "how it works under the hood," not the other way around
+
+### Q48: How to approach React coding challenges?
 
 **Answer:**
 
-1. **Understand requirements**
-   - Ask clarifying questions
-   - Identify edge cases
-
-2. **Plan your component structure**
-   - Break down into smaller components
-   - Identify state and props
-
-3. **Start with basic implementation**
-   - Make it work first, then optimize
-   - Use proper React patterns
-
-4. **Add features incrementally**
-   - State management
-   - Event handling
-   - Error handling
-   - Loading states
-
-5. **Optimize and refactor**
-   - Identify performance bottlenecks
-   - Use proper keys
-   - Memoize when necessary
-
-6. **Test your solution**
-   - Check different scenarios
-   - Verify edge cases
+1. **Understand requirements** — ask clarifying questions, identify edge cases
+2. **Plan your component structure** — break down into smaller components, identify state and props
+3. **Start with basic implementation** — make it work first, then optimize
+4. **Add features incrementally** — state management, event handling, error handling, loading states
+5. **Optimize and refactor** — identify performance bottlenecks, use proper keys, memoize only when necessary
+6. **Test your solution** — check different scenarios, verify edge cases
 
 ```jsx
 // Example: Build a todo list
@@ -2209,7 +2100,7 @@ function TodoApp() {
       <input 
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+        onKeyDown={(e) => e.key === 'Enter' && addTodo()}
       />
       <button onClick={addTodo}>Add</button>
       
@@ -2228,6 +2119,8 @@ function TodoApp() {
   );
 }
 ```
+
+(Note: `onKeyPress` is deprecated — use `onKeyDown` for key-event handling, as shown above.)
 
 ---
 
