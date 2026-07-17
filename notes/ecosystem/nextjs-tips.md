@@ -1,9 +1,8 @@
-# ⚡ `nextjs-tips.md`  
-*Next.js Pro Tips & Best Practices (App Router, React 19 — 2025 Edition)*
+# ⚡ `nextjs-tips.md`
+*Next.js Pro Tips & Best Practices (App Router, React 19+)*
 
-> ✅ **Last Updated**: November 7, 2025  
-> 🎯 **For**: Developers using **Next.js 14+ with App Router**  
-> 📌 **Assumes**: TypeScript, Server Components, `use client`, Server Actions
+> 🎯 **For**: Developers using **Next.js App Router**  
+> 📌 **Assumes**: TypeScript, Server Components, Client Components, Server Actions
 
 ---
 
@@ -22,13 +21,13 @@ npx create-next-app@latest my-app \
 
 | Flag | Why |
 |------|-----|
-| `--app` | ✅ Enables **App Router** (required for RSC, streaming) |
+| `--app` | Enables **App Router** (required for RSC, streaming) |
 | `--src-dir` | Cleaner root (`src/` instead of flat structure) |
 | `--import-alias "@/*"` | Absolute imports (`import Button from '@/components/ui/Button'`) |
 
 ---
 
-## 🗂️ 2. Folder Structure (2025 Standard)
+## 🗂️ 2. Folder Structure (Modern Standard)
 
 ```
 my-app/
@@ -49,14 +48,14 @@ my-app/
 │   └── public/                  # Static assets
 │
 ├── .env.local                   # Local env (gitignored)
-├── next.config.js
+├── next.config.ts
 ├── tsconfig.json
 └── package.json
 ```
 
 > 💡 **Rule of thumb**:  
 > - Keep `app/` **lean** — compose pages from `components/` and `lib/`.  
-> - Avoid logic in `app/` — push to `lib/` or Server Components.
+> - Avoid logic in `app/` — push to `lib/` or dedicated Server Components.
 
 ---
 
@@ -65,8 +64,9 @@ my-app/
 ### ✅ Dynamic Routes
 ```tsx
 // app/blog/[slug]/page.tsx
-export default async function Post({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug); // ✅ Data fetch in Server Component
+export default async function Post({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; // params is now a Promise in React 19
+  const post = await getPost(slug);
   return <article>{post.title}</article>;
 }
 ```
@@ -74,13 +74,13 @@ export default async function Post({ params }: { params: { slug: string } }) {
 ### ✅ Catch-all Routes
 ```tsx
 // app/docs/[...slug]/page.tsx
-export default function Docs({ params }: { params: { slug: string[] } }) {
-  // slug = ['getting', 'started'] for /docs/getting/started
-  return <nav>{params.slug.join(' > ')}</nav>;
+export default async function Docs({ params }: { params: Promise<{ slug: string[] }> }) {
+  const { slug } = await params;
+  return <nav>{slug.join(' > ')}</nav>;
 }
 ```
 
-### ✅ Navigation (App Router)
+### ✅ Navigation
 ```tsx
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -101,7 +101,7 @@ router.push("/settings");
 ```tsx
 // app/page.tsx
 export default async function Home() {
-  const posts = await db.post.findMany(); // ✅ Direct DB access — no API layer
+  const posts = await db.post.findMany(); // Direct DB access — no API layer
   return <PostsList posts={posts} />;
 }
 ```
@@ -145,17 +145,17 @@ export default function Page() {
 ### ✅ Basic Server Action
 ```ts
 // lib/actions.ts
-"use server";
+'use server';
 
 export async function createPost(formData: FormData) {
-  const title = formData.get("title") as string;
+  const title = formData.get('title') as string;
   await db.post.create({ data: { title } });
 }
 ```
 
 ```tsx
 // Client Component
-"use client";
+'use client';
 
 export default function PostForm() {
   const [state, formAction] = useActionState(createPost, null);
@@ -164,7 +164,7 @@ export default function PostForm() {
     <form action={formAction}>
       <input name="title" required />
       <button disabled={state?.pending}>
-        {state?.pending ? "Saving..." : "Save"}
+        {state?.pending ? 'Saving...' : 'Save'}
       </button>
     </form>
   );
@@ -197,8 +197,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 ### ✅ Dynamic Metadata
 ```tsx
 // app/blog/[slug]/page.tsx
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const post = await getPost(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPost(slug);
   return {
     title: post.title,
     description: post.excerpt,
@@ -218,7 +219,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 import Image from "next/image";
 
 <Image
-  src="/hero.avif"     // ✅ Prefer AVIF > WebP > PNG
+  src="/hero.avif"     // Prefer AVIF > WebP > PNG
   alt="Hero"
   width={1200}
   height={600}
@@ -339,9 +340,9 @@ export const env = z
 
 | Type | Tool | Why |
 |------|------|-----|
-| **Unit** | Vitest + RTL | ✅ Faster than Jest, ESM-native |
-| **E2E** | Playwright | ✅ Reliable, modern, supports auth flows |
-| **Visual** | Storybook + Chromatic | ✅ Catch UI regressions |
+| **Unit** | Vitest + RTL | Faster than Jest, ESM-native |
+| **E2E** | Playwright | Reliable, modern, supports auth flows |
+| **Visual** | Storybook + Chromatic | Catch UI regressions |
 
 **Vitest config** (`vitest.config.ts`):
 ```ts
@@ -364,21 +365,21 @@ export default defineConfig({
 
 ### ✅ Vercel (Recommended)
 - Zero-config preview deployments  
-- Built-in **Analytics**, **Speed Insights**, **AI Gateway**  
+- Built-in **Analytics**, **Speed Insights**  
 - `vercel --prod` for CLI deploy
 
 ### ✅ Self-Hosting (Docker)
 ```js
 // next.config.js
 module.exports = {
-  output: "standalone", // ✅ Generates minimal Docker image
+  output: "standalone", // Minimal Docker image
 };
 ```
 
 ### ✅ Observability
-- **Vercel Analytics**: Real-user metrics (FCP, LCP, INP)  
-- **Vercel Logs**: Runtime logs across all environments  
-- **Sentry**: Error tracking + source maps
+- **Vercel Analytics**: Real-user metrics (LCP, INP, CLS)  
+- **Sentry**: Error tracking + source maps  
+- **Logging**: Pino or `console.log` in edge functions
 
 ---
 
@@ -386,11 +387,13 @@ module.exports = {
 
 | Tip | Why |
 |-----|-----|
-| **Avoid `use client` overuse** | Every Client Component = JS bundle bloat |
-| **Use `cache()` for DB calls** | Prevents duplicate queries in one request |
-| **Server Actions + `zod`** | Type-safe validation on server |
-| **Parallel Routes for Modals** | `/settings?modal=edit` → clean UX |
-| **Route Groups `(marketing)/`** | Organize without affecting URLs |
+| **Avoid `'use client'` overuse** | Every Client Component adds to the JS bundle. Only mark interactive leaves. |
+| **Use `cache()` for DB calls** | Deduplicates queries during a single request. |
+| **Server Actions + Zod** | Type-safe validation on the server. |
+| **Parallel Routes for Modals** | `app/@modal/(.)photos/[id]` – clean, accessible overlays. |
+| **Route Groups `(marketing)/`** | Organize without affecting URL structure. |
+| **Static Exports for pure static sites** | `next.config.js: { output: 'export' }` |
+| **Prefer `fetch` over ORM in Server Components** | Automatic request deduplication & caching. |
 
 ---
 
@@ -399,12 +402,13 @@ module.exports = {
 | Resource | Link |
 |---------|------|
 | **Next.js Docs (App Router)** | [nextjs.org/docs/app](https://nextjs.org/docs/app) |
-| **Next.js Conf 2025** | [youtube.com/@nextjs](https://youtube.com/@nextjs) |
-| **NextAuth.js v5 Guide** | [next-auth.js.org](https://next-auth.js.org) |
+| **Next.js Learn** | [nextjs.org/learn](https://nextjs.org/learn) |
+| **NextAuth.js v5** | [next-auth.js.org](https://next-auth.js.org) |
 | **Vercel Analytics** | [vercel.com/analytics](https://vercel.com/analytics) |
 | **Bundle Analyzer** | [npmjs.com/package/@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer) |
 
 ---
 
 > ✅ **Summary**:  
-> *Next.js isn’t just a framework — it’s a full-stack platform. Leverage Server Components for data, Server Actions for mutations, and streaming for performance. Let the framework handle the hard parts — you focus on building great products.*
+> *Next.js is a full‑stack platform. Use Server Components for data, Server Actions for mutations, and streaming for performance. Let the framework handle the hard parts — you focus on building great products.*
+```
