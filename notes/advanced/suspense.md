@@ -1,8 +1,7 @@
 # 🌀 `suspense.md`
 
-_Suspense in React: Beyond the Loading Spinner (2025 Edition)_
+_Suspense in React: Beyond the Loading Spinner_
 
-> ✅ **Last Updated**: November 7, 2025  
 > 📌 **TL;DR**:
 >
 > - `Suspense` is **not a loading state manager** — it’s a _contract_ for components to signal “I’m not ready yet.”
@@ -42,7 +41,7 @@ _Suspense in React: Beyond the Loading Spinner (2025 Edition)_
 
 ---
 
-## 🧩 Core Patterns (2025)
+## 🧩 Core Patterns
 
 ### 1. **Code Splitting (Client Components)**
 
@@ -231,11 +230,11 @@ Or per-boundary:
 </Suspense>
 ```
 
-> ⚠️ `unstable_avoidThisFallback` may be renamed in React 19 — use sparingly.
+> ⚠️ `unstable_avoidThisFallback` may be renamed in future React versions — use sparingly.
 
 ---
 
-## 🌐 Suspense + Server Actions (React 19)
+## 🌐 Suspense + Server Actions (React 19+)
 
 Server Actions can _also_ suspend — and `useOptimistic` pairs beautifully:
 
@@ -288,7 +287,7 @@ export default function Comments({ initialComments }) {
 | TanStack Query (non-suspense) | Most apps (simpler, more control)         | Manual loading states           |
 | `useTransition`               | Non-urgent UI updates (search, filters)   | Doesn’t replace data loading    |
 
-> ✅ **2025 Recommendation**:
+> ✅ **Modern Recommendation**:
 >
 > - For **Next.js App Router**: Embrace Suspense + RSC streaming
 > - For **Vite/SPA**: Use TanStack Query + `useTransition` — avoid manual Suspense
@@ -307,5 +306,4 @@ export default function Comments({ initialComments }) {
 > 💡 **Final Thought**:  
 > _“Suspense isn’t about hiding latency — it’s about embracing asynchrony as a first-class part of your UI architecture.”_  
 > — Design for **graceful progression**, not just loading states.
-
----
+```
