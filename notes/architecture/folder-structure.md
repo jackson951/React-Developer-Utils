@@ -1,280 +1,225 @@
 # React Project Folder Structure Guide
 
-## Small to Medium Projects
+A practical guide to organizing React projects of any size — from a weekend prototype to a large‑scale enterprise application. The goal is **clarity, scalability, and developer happiness**, not rigid rules.
+
+---
+
+## Guiding Principles
+
+- **Co-location**: Keep files that change together close together (component + its styles + tests + stories).
+- **Feature‑first**: Group by business domain, not technical role (e.g., `features/cart` over `components/Cart`).
+- **Flat where possible**: Avoid deeply nested folders; a 3–4 level maximum is a good rule of thumb.
+- **Explicit over implicit**: Use clear, descriptive names; barrel exports (`index.ts`) only for public API surfaces.
+- **TypeScript by default**: All examples assume TypeScript (`.tsx` / `.ts`), but the same structure works for JavaScript.
+
+---
+
+## Recommended Tech Stack (Modern Baseline)
+
+| Layer             | Preferred                                  |
+|------------------|--------------------------------------------|
+| **Framework**    | Next.js App Router (full‑stack) or Vite (SPA) |
+| **Styling**      | Tailwind CSS + `clsx`/`cn` utility          |
+| **State (UI)**   | Zustand (global) + `useState`/`useReducer` (local) |
+| **State (Server)**| TanStack Query + Server Components          |
+| **Testing**      | Vitest + React Testing Library + Playwright |
+
+---
+
+## Small to Medium Projects (< 15 screens)
+
+Best for side projects, MVPs, or small teams. Keep it simple and flat.
 
 ```
 src/
-├── assets/
-│   ├── images/
-│   ├── fonts/
-│   └── icons/
+├── app/                         # Next.js App Router (or main.tsx for Vite)
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── (routes)/                # Route groups & page files
 ├── components/
-│   ├── common/
-│   │   ├── Button/
-│   │   │   ├── Button.jsx
-│   │   │   ├── Button.test.jsx
-│   │   │   └── Button.module.css
-│   │   ├── Input/
-│   │   └── Modal/
-│   └── layout/
-│       ├── Header/
-│       ├── Footer/
-│       └── Sidebar/
-├── pages/
-│   ├── Home/
-│   │   ├── Home.jsx
-│   │   └── Home.module.css
-│   ├── About/
-│   └── Dashboard/
-├── hooks/
-│   ├── useAuth.js
-│   ├── useFetch.js
-│   └── useLocalStorage.js
-├── utils/
-│   ├── formatters.js
-│   ├── validators.js
-│   └── helpers.js
-├── services/
-│   ├── api.js
-│   └── auth.js
-├── context/
-│   ├── AuthContext.jsx
-│   └── ThemeContext.jsx
-├── styles/
-│   ├── globals.css
-│   └── variables.css
-├── App.jsx
-├── main.jsx
-└── routes.jsx
+│   ├── ui/                      # Generic design‑system primitives (Button, Input)
+│   └── layout/                  # Header, Footer, Sidebar…
+├── hooks/                       # Shared custom hooks
+├── lib/                         # API client, utilities, constants
+├── styles/                      # Global CSS or Tailwind imports
+└── types/                       # Shared TypeScript types
 ```
 
-## Large-Scale Enterprise Projects
+**When to use:** Single developer, limited feature overlap, quick iterations.
+
+---
+
+## Medium to Large Projects (Multiple features, growing team)
+
+Introduce a **feature‑based layer** while keeping shared primitives separate.
 
 ```
 src/
-├── assets/
-│   ├── images/
-│   ├── fonts/
-│   ├── icons/
-│   └── videos/
-├── components/
-│   ├── common/         # Shared across entire app
-│   │   ├── Button/
-│   │   ├── Input/
-│   │   ├── Card/
-│   │   └── Loader/
-│   ├── layout/         # Layout components
-│   │   ├── Header/
-│   │   ├── Footer/
-│   │   ├── Sidebar/
-│   │   └── Navigation/
-│   └── forms/          # Form-specific components
-│       ├── LoginForm/
-│       └── SignupForm/
-├── features/           # Feature-based modules
-│   ├── auth/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   ├── store/
-│   │   └── utils/
-│   ├── products/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── store/
-│   └── orders/
-├── pages/              # Route-level components
-│   ├── Home/
-│   ├── Dashboard/
-│   ├── Profile/
-│   └── NotFound/
-├── hooks/              # Global custom hooks
-│   ├── useAuth.js
-│   ├── useDebounce.js
-│   └── useMediaQuery.js
-├── store/              # State management (Redux/Zustand)
-│   ├── slices/
-│   │   ├── authSlice.js
-│   │   └── userSlice.js
-│   ├── middleware/
-│   └── store.js
-├── services/           # API calls and external services
-│   ├── api/
-│   │   ├── client.js
-│   │   ├── auth.js
-│   │   └── products.js
-│   └── analytics/
-├── utils/              # Utility functions
-│   ├── formatters.js
-│   ├── validators.js
-│   ├── constants.js
-│   └── helpers.js
-├── config/             # App configuration
-│   ├── routes.js
-│   ├── env.js
-│   └── theme.js
-├── types/              # TypeScript types/interfaces
-│   ├── user.ts
-│   └── product.ts
-├── styles/             # Global styles
-│   ├── globals.css
-│   ├── variables.css
-│   └── mixins.css
-├── tests/              # Test utilities and setup
-│   ├── mocks/
-│   ├── fixtures/
-│   └── setup.js
-├── App.jsx
-├── main.jsx
-└── router.jsx
-```
-
-## Feature-Based Architecture (Recommended for Large Apps)
-
-```
-src/
+├── app/                         # Next.js pages & layouts (thin – mainly compose features)
 ├── features/
-│   ├── authentication/
-│   │   ├── components/
-│   │   │   ├── LoginForm.jsx
-│   │   │   └── SignupForm.jsx
-│   │   ├── hooks/
-│   │   │   └── useAuth.js
-│   │   ├── services/
-│   │   │   └── authService.js
-│   │   ├── store/
-│   │   │   └── authSlice.js
-│   │   ├── utils/
-│   │   │   └── validators.js
-│   │   └── index.js        # Public API
+│   ├── auth/                    # Everything related to authentication
+│   │   ├── components/          # LoginForm, SignUpForm…
+│   │   ├── hooks/               # useAuth, useLogin
+│   │   ├── api/                 # authService, mutations
+│   │   ├── store/               # Zustand slice or Redux slice
+│   │   └── utils/               # feature‑specific validators, helpers
 │   ├── products/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── store/
-│   └── cart/
+│   └── orders/
 ├── shared/
-│   ├── components/
-│   ├── hooks/
-│   ├── utils/
-│   └── types/
-├── core/
-│   ├── api/
-│   ├── config/
-│   └── router/
-└── App.jsx
+│   ├── ui/                      # Reusable design system (Button, Card, Modal…)
+│   ├── hooks/                   # useDebounce, useLocalStorage…
+│   ├── lib/                     # Formatting, apiClient, env validation
+│   └── types/                   # Global domain types (User, Order…)
+├── config/                      # App configuration, routes, theme
+├── styles/                      # Global styles & Tailwind config
+└── tests/                       # Global test setup, mocks, fixtures
 ```
 
-## Component Structure Guidelines
+**Key rules:**
 
-### Option 1: Co-located Files
+- **`features/`** folder is the backbone. Each feature is a self‑contained module with its own components, hooks, API logic, and state.
+- **`shared/`** contains only code that is truly generic and used across multiple features. Avoid dumping everything here.
+- **`app/`** stays thin – it composes features and handles routing/metadata.
 
-```
-Button/
-├── Button.jsx
-├── Button.test.jsx
-├── Button.module.css
-├── Button.stories.jsx
-└── index.js
-```
+---
 
-### Option 2: Separate Test Directory
+## Enterprise / Large‑Scale Projects
+
+When multiple teams work on different domains, add **domain boundaries** and **packages** (monorepo).
 
 ```
-components/
-├── Button/
-│   ├── Button.jsx
-│   ├── Button.module.css
-│   └── index.js
-└── __tests__/
-    └── Button.test.jsx
+packages/
+├── core/                        # Design system, shared UI components, tokens
+├── utils/                       # Shared utilities
+├── api/                         # API client & server contracts
+├── features/
+│   ├── auth/
+│   ├── catalog/
+│   └── checkout/
+└── app/                         # Next.js or Vite app that assembles everything
 ```
 
-## Best Practices
+Using tools like **Turborepo** or **Nx** to manage dependencies and build pipelines.
 
-### 1. **Component Organization**
+---
 
-- Keep components in their own folders
-- Include tests, styles, and stories alongside components
-- Use `index.js` for clean imports
+## Component Structure (Co-location)
 
-### 2. **Naming Conventions**
+Every component lives in its own folder with all related files. This makes it trivial to move, delete, or reason about.
 
-- Components: PascalCase (`Button.jsx`, `UserProfile.jsx`)
-- Utilities/Hooks: camelCase (`useAuth.js`, `formatDate.js`)
-- Constants: UPPER_SNAKE_CASE (`API_BASE_URL`)
+### Recommended (Design‑System Components)
 
-### 3. **Import Structure**
-
-```javascript
-// External dependencies
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-// Internal dependencies (absolute imports)
-import Button from "@/components/common/Button";
-import { useAuth } from "@/hooks/useAuth";
-import { formatDate } from "@/utils/formatters";
-
-// Relative imports
-import styles from "./Component.module.css";
+```
+components/ui/Button/
+├── Button.tsx                   # Component implementation
+├── Button.test.tsx              # Unit/integration tests
+├── Button.stories.tsx           # Storybook story (optional)
+├── Button.module.css            # CSS Modules (if not using Tailwind)
+└── index.ts                     # Public API: export { Button } from './Button';
 ```
 
-### 4. **Path Aliases (jsconfig.json / tsconfig.json)**
+### For feature components:
+
+```
+features/cart/components/CartItem/
+├── CartItem.tsx
+├── CartItem.test.tsx
+├── CartItemSkeleton.tsx         # Loading state variant
+└── index.ts
+```
+
+Tests always live alongside the component – not in a separate `__tests__` folder. This makes them easy to discover and maintain.
+
+---
+
+## Naming Conventions
+
+| What               | Convention                        | Example                     |
+|--------------------|-----------------------------------|-----------------------------|
+| Component files    | PascalCase                        | `UserAvatar.tsx`            |
+| Hooks              | `use` prefix, camelCase           | `useAuth.ts`                |
+| Utility functions  | camelCase, descriptive verb       | `formatCurrency.ts`         |
+| Types/interfaces   | PascalCase                        | `User.ts`, `Order.ts`       |
+| Barrel exports     | `index.ts` (only at public boundaries) |                           |
+| Constants          | UPPER_SNAKE_CASE                  | `MAX_UPLOAD_SIZE`           |
+
+---
+
+## Path Aliases (TypeScript)
+
+Configure path aliases to keep imports clean and refactor‑safe.
+
+`tsconfig.json`:
 
 ```json
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/hooks/*": ["hooks/*"],
-      "@/utils/*": ["utils/*"],
-      "@/services/*": ["services/*"],
-      "@/assets/*": ["assets/*"]
+      "@/*": ["src/*"],
+      "@/components/*": ["src/shared/ui/*"],
+      "@/hooks/*": ["src/shared/hooks/*"],
+      "@/features/*": ["src/features/*"],
+      "@/lib/*": ["src/shared/lib/*"]
     }
   }
 }
 ```
 
-### 5. **Public Folder**
+Vite and Next.js respect these aliases automatically. Imports become:
 
-```
-public/
-├── favicon.ico
-├── robots.txt
-├── manifest.json
-└── locales/
-    ├── en.json
-    └── es.json
+```tsx
+import { Button } from '@/components/Button';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 ```
 
-## Architecture Patterns
+---
 
-### Pages vs Features
+## Modern Considerations (RSC & Next.js App Router)
 
-- **Pages**: Route-level components that compose features
-- **Features**: Self-contained business logic modules
+- **Server Components (default)**: Can import and render client components. Keep them focused on data fetching and static UI.
+- **Client Components (`'use client'`)**: For interactivity, hooks, and browser APIs. Co-locate with their feature, but mark them explicitly.
+- **Data fetching**: Use Server Components to fetch data and pass it down as props. Use TanStack Query on the client only when you need caching, polling, or optimistic updates.
 
-### When to Use What Structure
+Layouts and pages in `app/` compose features, which themselves can mix server and client components as needed.
 
-- **Small projects** (<10 components): Flat structure
-- **Medium projects** (10-50 components): Grouped by type
-- **Large projects** (50+ components): Feature-based or domain-driven
+---
+
+## When to Choose Which Structure
+
+| Project size | Recommended structure                                    |
+|--------------|----------------------------------------------------------|
+| Prototype / tiny team | Flat `components/`, minimal layers                |
+| 1–3 developers, few features | Basic feature folders + `shared/`            |
+| 4+ developers, many features | Full feature‑based architecture with explicit boundaries |
+| Multi‑team / monorepo | Domain packages, shared core, strict module contracts |
+
+---
 
 ## Common Pitfalls to Avoid
 
-1. **Too deep nesting** - Keep folders max 3-4 levels deep
-2. **Mixing concerns** - Don't put business logic in components
-3. **Unclear naming** - Use descriptive, consistent names
-4. **No index files** - Use index.js for cleaner imports
-5. **Large components** - Split into smaller, reusable pieces
+- **Over‑abstracting too early** – Start simple, extract only when patterns repeat.
+- **Deep nesting** – Keep folder depth to 3–4 levels maximum.
+- **Mixing concerns** – Don’t put business logic in UI components.
+- **Monolithic `common/` folder** – If a component is used in only one feature, keep it there.
+- **Ignoring barrel file hygiene** – Only expose what’s necessary; don’t re‑export the entire folder.
 
-## Recommended File Extensions
+---
 
-- `.jsx` for React components with JSX
-- `.js` for utilities, configs, and plain JavaScript
-- `.ts/.tsx` for TypeScript projects
-- `.module.css` for CSS Modules
-- `.test.js` or `.spec.js` for tests
+## Tooling & Automation
+
+Use these to enforce structure and consistency:
+
+- **Biome** or ESLint + Prettier for formatting and linting.
+- **Husky** + **lint‑staged** for pre‑commit checks.
+- **TypeScript strict mode** as a design constraint.
+- **Storybook** (optional) for isolated component development.
+
+---
+
+## Summary
+
+> The best folder structure is the one your team agrees on and can evolve.  
+> **Start flat, go feature‑based as you scale, and never stop refining.**  
+> Co‑location, clear naming, and module boundaries are the pillars of a maintainable React codebase.
+```
