@@ -1,8 +1,7 @@
-# 🧩 React Patterns (2025 Edition)
+# 🧩 React Patterns
 
 _Battle-tested patterns for modern React (v18–v19), Server Components, and real-world apps._
 
-> ✅ **Last Updated**: November 7, 2025  
 > 🎯 **Prerequisites**: Hooks, JSX, basic TypeScript  
 > 📦 **All examples in TypeScript**, RSC-ready where applicable  
 > 🔥 Inspired by Meta, Shopify, Vercel, and OSS best practices
@@ -53,7 +52,7 @@ _Battle-tested patterns for modern React (v18–v19), Server Components, and rea
 
 ```tsx
 // Tabs.tsx
-import { Children, createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type TabsContextType = {
   activeIndex: number;
@@ -597,7 +596,6 @@ export default async function ProfilePage() {
 
 export default function UserActions({ userId }: { userId: string }) {
   const [isFollowing, setIsFollowing] = useState(false);
-  const toggleFollow = useActionState(followAction, false);
   // ...
 }
 ```
@@ -886,8 +884,6 @@ useEffect(() => {
 
 ---
 
-📥 **Download**: [react-patterns.md](https://gist.github.com/...)  
-⭐ **Tip**: Bookmark this. Revisit before major refactorings.
-
 > “Patterns are not prescriptions. They’re distilled experience. Adapt them — don’t idolize them.”  
 > — _Adapted from Martin Fowler_
+```
