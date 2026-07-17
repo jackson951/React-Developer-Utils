@@ -1,8 +1,8 @@
+
 # 🛡️ `error-boundaries.md`
 
 _Graceful failure in React apps — beyond the basics._
 
-> ✅ **Last Updated**: November 7, 2025  
 > 📌 **TL;DR**:
 >
 > - Error boundaries **only catch errors in child components’ lifecycle/render** — _not_ in event handlers, async code, or Server Components.
@@ -26,7 +26,7 @@ It uses two lifecycle methods (class-based only — _no hook equivalent_):
 >
 > - Errors in **event handlers** (e.g., `onClick`)
 > - Errors in **asynchronous code** (`setTimeout`, `fetch.then`)
-> - Errors in **Server Components**
+> - Errors in **Server Components** (they run on the server)
 > - Errors thrown in the error boundary itself
 
 ---
@@ -148,6 +148,59 @@ Handle both loading _and_ error states:
 ```
 
 > 📝 Note: `Suspense` catches promise rejections from `async` Server Components — _not_ JavaScript errors.
+
+---
+
+## 🧰 Modern Alternative: `react-error-boundary`
+
+The `react-error-boundary` library provides a **hook-based API** and additional features like `onReset`, `resetKeys`, and `FallbackComponent`.
+
+```bash
+npm install react-error-boundary
+```
+
+```tsx
+import { ErrorBoundary } from "react-error-boundary";
+
+function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error, info) => {
+        // Log to Sentry, etc.
+        console.error(error, info);
+      }}
+      onReset={() => {
+        // Reset any state that caused the error
+      }}
+    >
+      <UserProfile />
+    </ErrorBoundary>
+  );
+}
+```
+
+✅ Benefits over plain class components:
+- No need to write a class.
+- Built‑in `resetErrorBoundary()` to retry.
+- `resetKeys` support: automatically reset when certain props change.
+- Better `Suspense` integration with `useErrorBoundary` hook (if needed).
 
 ---
 
@@ -279,11 +332,11 @@ export const withErrorBoundary = (ui: ReactElement) => (
 - [Next.js: Error Handling](https://nextjs.org/docs/app/building-your-application/routing/error-handling)
 - [Sentry React Guide](https://docs.sentry.io/platforms/javascript/guides/react/)
 - [Testing Error Boundaries (RTL)](https://testing-library.com/docs/react-testing-library/example-intro#test-the-unhappy-path)
+- [react-error-boundary GitHub](https://github.com/bvaughn/react-error-boundary)
 
 ---
 
 > 💡 **Final Thought**:  
 > _“Users don’t care that your app is ‘React-based.’ They care that it works — especially when things go wrong.”_  
 > — Build empathy into your error states.
-
----
+```
