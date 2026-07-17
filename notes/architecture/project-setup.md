@@ -1,9 +1,8 @@
 # project-setup.md
 
-*Professional React Project Setup (2026 Edition)*
+*Professional React Project Setup*
 *From project initialization to CI/CD — production-ready by default.*
 
-> **Last Updated**: January 18, 2026
 > **Audience**: Solo developers, startups, agencies, enterprise teams
 > **Stack**: Next.js (App Router) or Vite, TypeScript, Biome, Vitest, Playwright
 > **Influences**: Practices from Vercel, Shopify, and mature open‑source projects
@@ -19,7 +18,7 @@
 | SPA, PWA, Electron, widgets     | Vite + React         | Faster dev server, minimal abstraction    |
 | Mobile + Web                    | Next.js + Expo       | Shared business logic, separate UI layers |
 
-**Default (2026)**: Prefer **Next.js App Router** unless you explicitly require framework‑level control.
+**Default (modern)**: Prefer **Next.js App Router** unless you explicitly require framework‑level control.
 
 ---
 
@@ -259,4 +258,5 @@ Use ADRs to document irreversible or high‑impact decisions.
 
 ---
 
-**Guiding principle**: Optimize for clarity, repeatability, and long‑term maintainability. Tooling exists to reduce friction, not to define a
+**Guiding principle**: Optimize for clarity, repeatability, and long‑term maintainability. Tooling exists to reduce friction, not to define architecture.
+```
