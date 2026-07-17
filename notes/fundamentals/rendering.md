@@ -1,52 +1,53 @@
-### 📘 **File:** `notes/fundamentals/rendering.md`
-
 # 🖼️ Rendering in React
 
-> Rendering is how React converts your **components and state** into UI elements on the screen.
-> Understanding rendering patterns is essential for **performance** and **maintainability**.
+> Rendering is the process by which React takes your components and state, and produces the UI that appears on the screen.  
+> Understanding how, when, and why React renders is fundamental to building fast, predictable applications.
 
 ---
 
-## 🚀 1. Rendering Basics
+## 🚀 1. What Is Rendering?
 
-* React components return **JSX** or **React elements**.
-* Every **state or prop change** triggers a **re-render** of the component.
+React components are **functions** that return **React elements** (JSX).  
+When the app starts (or state/props change), React calls these functions to produce a virtual description of the UI. It then compares it with the previous description (reconciliation) and updates the real DOM efficiently.
 
-```jsx
-function Welcome({ name }) {
+```tsx
+function Welcome({ name }: { name: string }) {
   return <h1>Hello, {name}!</h1>;
 }
 ```
 
-* **Re-rendering propagates down** the component tree by default.
+- **Initial render** – when a component first appears on the screen.
+- **Re-render** – triggered by state updates, prop changes, context changes, or parent re-renders.
 
 ---
 
 ## ⚡ 2. Conditional Rendering
 
-### 2.1 Ternary Operator
+Display different content based on logic.
 
-```jsx
-function Status({ isOnline }) {
-  return <p>{isOnline ? "Online" : "Offline"}</p>;
+### Ternary operator
+
+```tsx
+function Status({ isOnline }: { isOnline: boolean }) {
+  return <p>{isOnline ? 'Online' : 'Offline'}</p>;
 }
 ```
 
-### 2.2 Short-circuit Operator
+### Logical AND (`&&`)
 
-```jsx
+```tsx
 {isOnline && <p>User is online</p>}
 ```
 
-### 2.3 IIFE (Immediately Invoked Function Expression)
+### Early returns
 
-```jsx
-{
-  (() => {
-    if (status === "loading") return <p>Loading...</p>;
-    if (status === "error") return <p>Error!</p>;
-    return <p>Success</p>;
-  })();
+For more complex logic, return early to avoid deeply nested conditions:
+
+```tsx
+function Dashboard({ user }: { user: User | null }) {
+  if (!user) return <LoginScreen />;
+  if (!user.isVerified) return <VerificationPrompt />;
+  return <MainDashboard user={user} />;
 }
 ```
 
@@ -54,154 +55,174 @@ function Status({ isOnline }) {
 
 ## 🧩 3. Rendering Lists
 
-Use `map()` to render arrays:
+Transform arrays into elements with `.map()`. Always provide a **stable, unique key**.
 
-```jsx
-const users = ["Alice", "Bob", "Charlie"];
+```tsx
+const users = ['Alice', 'Bob', 'Charlie'];
 
 <ul>
   {users.map((user, index) => (
-    <li key={index}>{user}</li>
+    <li key={user}>{user}</li>  // use user as key if unique, otherwise user.id
   ))}
-</ul>;
+</ul>
 ```
 
-✅ Always provide **unique keys** for list items to optimize updates.
+For objects:
 
-Rendering objects:
-
-```jsx
+```tsx
 const todos = [
-  { id: 1, title: "Learn React" },
-  { id: 2, title: "Build App" },
+  { id: 1, title: 'Learn React' },
+  { id: 2, title: 'Build App' },
 ];
 
 <ul>
-  {todos.map((todo) => (
+  {todos.map(todo => (
     <li key={todo.id}>{todo.title}</li>
   ))}
-</ul>;
+</ul>
 ```
+
+- **Never use index as key** if the list can change order, items can be added/removed, or the list is dynamic. It leads to bugs and performance issues.
 
 ---
 
 ## 🌐 4. Fragment Rendering
 
-Avoid extra DOM elements using **Fragments**:
+Avoid adding unnecessary DOM nodes by wrapping multiple elements in a Fragment:
 
-```jsx
+```tsx
 <>
   <h1>Title</h1>
   <p>Paragraph</p>
 </>
 ```
 
+Fragments can also have a `key` when used in lists:
+
+```tsx
+items.map(item => (
+  <React.Fragment key={item.id}>
+    <dt>{item.term}</dt>
+    <dd>{item.description}</dd>
+  </React.Fragment>
+))
+```
+
 ---
 
 ## 🔄 5. Portal Rendering
 
-Render children into a **different DOM node** using **Portals**:
+Render children into a different DOM node, outside the parent component’s hierarchy. Perfect for modals, tooltips, and dropdowns.
 
-```jsx
-import { createPortal } from "react-dom";
+```tsx
+import { createPortal } from 'react-dom';
 
-function Modal({ children }) {
+function Modal({ children }: { children: React.ReactNode }) {
   return createPortal(
-    <div className="modal">{children}</div>,
-    document.getElementById("modal-root")
+    <div className="modal-overlay">
+      <div className="modal-content">{children}</div>
+    </div>,
+    document.getElementById('modal-root')!
   );
 }
 ```
 
-✅ Ideal for **modals, tooltips, and overlays**.
+This preserves event bubbling in the React tree while placing DOM elsewhere.
 
 ---
 
-## 🧪 6. Conditional Component Rendering
+## 🧪 6. Rendering Patterns for Performance
 
-```jsx
-function Page({ isAuthenticated }) {
-  if (!isAuthenticated) return <Login />;
-  return <Dashboard />;
+React’s default behavior is to re-render a component when its parent renders. You can opt‑out of unnecessary re‑renders with:
+
+- `React.memo` – for pure components that only depend on props.
+- `useMemo` – for expensive calculations.
+- `useCallback` – for stable function references passed to memoised children.
+
+```tsx
+import { memo, useMemo, useCallback } from 'react';
+
+const ExpensiveList = memo(function ExpensiveList({ items }: { items: string[] }) {
+  // component only re-renders when `items` changes
+  return <ul>{items.map(item => <li key={item}>{item}</li>)}</ul>;
+});
+
+function Parent({ data }: { data: number[] }) {
+  const sorted = useMemo(() => [...data].sort(), [data]);
+  const handleClick = useCallback((id: string) => {
+    console.log(id);
+  }, []);
+
+  return <ExpensiveList items={sorted} onItemClick={handleClick} />;
 }
 ```
 
-* Prevents rendering unnecessary components for better performance.
+> **Important**: Do not memoise everything. Profile first, optimise second. The React Compiler (future) will automate much of this.
 
 ---
 
-## ⚡ 7. Rendering Performance Tips
+## 🖥️ 7. Server Components & Rendering
 
-* Use **React.memo** for pure functional components:
+In frameworks like Next.js App Router, **Server Components** are rendered on the server and their output is sent as HTML. They never re-render on the client and cannot use hooks or interactivity.
 
-```jsx
-const Button = React.memo(({ label, onClick }) => (
-  <button onClick={onClick}>{label}</button>
-));
-```
+Client Components (`'use client'`) are rendered on the server for the initial HTML and then **hydrated** on the client for interactivity. They follow the traditional rendering lifecycle.
 
-* Use **useMemo** for expensive computations:
+- **Server Components**: Data fetching, direct DB access, no JS sent to client.
+- **Client Components**: Interactivity, state, effects.
 
-```jsx
-const computedValue = useMemo(() => heavyComputation(data), [data]);
-```
-
-* Use **useCallback** for stable function references:
-
-```jsx
-const handleClick = useCallback(() => console.log("Clicked"), []);
-```
-
-* Avoid **inline objects** and **function definitions** inside `render()` when possible.
+Data flows from Server to Client via **props** – not via Context.
 
 ---
 
-## 🔧 8. Conditional Class Names
+## 🧱 8. Conditional Class Names
 
-```jsx
-<div className={`card ${isActive ? "active" : ""}`}>Content</div>;
-```
+For dynamic styling, use template literals or a utility like `clsx` / `tailwind-merge`.
 
-Use **clsx** or **classnames** for better readability:
+```tsx
+import { cn } from '@/lib/cn'; // custom utility
 
-```bash
-npm install clsx
-```
-
-```jsx
-import clsx from "clsx";
-
-<div className={clsx("card", { active: isActive, disabled: isDisabled })}>
-  Content
-</div>;
+function Button({ variant }: { variant: 'primary' | 'secondary' }) {
+  return (
+    <button
+      className={cn(
+        'px-4 py-2 rounded',
+        variant === 'primary' && 'bg-blue-600 text-white',
+        variant === 'secondary' && 'bg-gray-200 text-black'
+      )}
+    >
+      Click
+    </button>
+  );
+}
 ```
 
 ---
 
-## 🧭 9. Best Practices
+## 🔧 9. Best Practices
 
-* Keep components **pure** whenever possible
-* Minimize **unnecessary re-renders**
-* Always provide **unique keys** in lists
-* Prefer **Fragments** over extra DOM wrappers
-* Split large components into smaller **rendering-focused** ones
-* Use **Portals** for modals and overlays
-* Optimize heavy logic with `React.memo`, `useMemo`, and `useCallback`
+- **Keep components pure** – same props → same output.
+- **Minimise re-renders** with colocation, memo, and proper component splitting.
+- **Use unique keys** for lists.
+- **Prefer Fragments** over extra `<div>` wrappers.
+- **Portals** for modals/tooltips.
+- **Avoid defining components inside components** – they reset state on each render.
+- **Leverage Server Components** for static content, Client Components only for interactivity.
+- **Profile with React DevTools** before optimising.
 
 ---
 
 ## 🔗 10. Resources
 
-* [React Docs – Conditional Rendering](https://reactjs.org/docs/conditional-rendering.html)
-* [React Docs – Lists and Keys](https://reactjs.org/docs/lists-and-keys.html)
-* [React Docs – Portals](https://reactjs.org/docs/portals.html)
-* [React Docs – Optimizing Performance](https://reactjs.org/docs/optimizing-performance.html)
+- [React Docs: Conditional Rendering](https://react.dev/learn/conditional-rendering)
+- [React Docs: Rendering Lists](https://react.dev/learn/rendering-lists)
+- [React Docs: Portals](https://react.dev/reference/react-dom/createPortal)
+- [React Docs: memo](https://react.dev/reference/react/memo)
+- [React Docs: Server Components](https://react.dev/learn/server-components)
 
 ---
 
 ✅ **Summary**
 
-> React rendering is **reactive** — components re-render whenever **state** or **props** change.
-> Master **conditional rendering, lists, fragments, portals**, and **performance optimizations** to build fast, maintainable UIs.
-
-
+> React rendering is **declarative** and **reactive**.  
+> Master conditional rendering, lists, portals, and performance techniques to build efficient, maintainable UIs.  
+> In the modern era, understanding the separation between Server and Client rendering is just as important.
