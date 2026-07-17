@@ -2,7 +2,6 @@
 
 _Mastering React Hooks — beyond the basics._
 
-> ✅ **Last Updated**: November 7, 2025  
 > 📌 **TL;DR**:
 >
 > - Hooks are **functions**, not magic — understand closures, timing, and stale values.
@@ -24,7 +23,7 @@ _Mastering React Hooks — beyond the basics._
 
 ---
 
-## 📋 Core Built-in Hooks (2025 Usage)
+## 📋 Core Built-in Hooks
 
 ### `useState`
 
@@ -342,5 +341,4 @@ test("increments counter", () => {
 > 💡 **Final Thought**:  
 > _“Hooks aren’t about replacing classes — they’re about thinking in closures, effects, and data flow. Master that, and React becomes intuitive.”_  
 > — Adapted from Dan Abramov
-
----
+```
