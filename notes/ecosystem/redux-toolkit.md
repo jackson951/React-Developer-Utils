@@ -1,7 +1,6 @@
 # 🧠 `redux-toolkit.md`  
-*Redux Toolkit (RTK) — The Modern, Efficient Way to Manage State (2025 Edition)*
+*Redux Toolkit (RTK) — The Modern, Efficient Way to Manage State*
 
-> ✅ **Last Updated**: November 7, 2025  
 > 🎯 **For**: Developers building medium-to-large React apps with shared state  
 > 📌 **Assumes**: Familiarity with React hooks, basic Redux concepts  
 > 🔑 **Key Insight**: *RTK isn’t just “Redux with less code” — it’s “Redux with better defaults.”*
@@ -20,7 +19,7 @@ Redux Toolkit (RTK) is the **official, recommended approach** to Redux — built
 | Async logic scattered across thunks, sagas, etc. | ✅ `createAsyncThunk` + `extraReducers` pattern |
 | Poor TypeScript support | ✅ First-class TS — zero `any`, strong typing out of the box |
 
-> 💡 **When to use RTK (2025 rule of thumb)**:  
+> 💡 **When to use RTK (modern rule of thumb)**:  
 > - You have **cross-cutting state** (auth, cart, filters, notifications)  
 > - You need **dev-time debugging** (Redux DevTools time travel)  
 > - Your team values **predictability over magic**  
@@ -47,7 +46,7 @@ npm install --save-dev @types/react-redux
 
 ---
 
-## 🗂️ Folder Structure (Feature-Sliced, 2025 Standard)
+## 🗂️ Folder Structure (Feature-Sliced, Modern Standard)
 
 ```
 src/
@@ -388,7 +387,7 @@ const loggerMiddleware = (store: any) => (next: any) => (action: any) => {
 
 ---
 
-## 🧱 Best Practices (2025)
+## 🧱 Best Practices
 
 | Practice | Why |
 |---------|-----|
@@ -432,5 +431,5 @@ npm install @reduxjs/toolkit/query redux-persist reselect
 > ✅ **Summary**:  
 > *Redux Toolkit is not “Redux with less code” — it’s Redux rebuilt for the modern era: type-safe, dev-friendly, and focused on real-world ergonomics. Use it for global state that needs structure, debugging, and cross-component sharing — and pair it with RTK Query for data.*  
 
-> 🔮 **2025 Forecast**: RTK Query + Server Components (Next.js) = the future of full-stack data management.
-
+> 🔮 **Modern Forecast**: RTK Query + Server Components (Next.js) = the future of full-stack data management.
+```
