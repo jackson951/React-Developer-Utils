@@ -1,13 +1,12 @@
 # 🎨 `tailwind.md`  
-*Tailwind CSS for React Developers — The 2025 Guide*
+*Tailwind CSS for React Developers — The Modern Guide*
 
-> ✅ **Last Updated**: November 7, 2025  
 > 🎯 **For**: React developers using **Vite, Next.js, or Turbopack**  
 > 📌 **Assumes**: TypeScript, component-driven architecture, accessibility awareness  
 
 ---
 
-## 🚀 1. Installation & Setup (2025 Standard)
+## 🚀 1. Installation & Setup
 
 ### ✅ Vite + React (Recommended)
 ```bash
@@ -123,7 +122,7 @@ src/
 
 ---
 
-## 🌗 4. Dark Mode (2025 Best Practice)
+## 🌗 4. Dark Mode
 
 ### ✅ System-Aware, User-Overridable
 ```ts
@@ -163,7 +162,7 @@ return <button onClick={toggleTheme}>🌙 / ☀️</button>;
 
 ---
 
-## 📱 5. Responsive Design (Beyond Breakpoints)
+## 📱 5. Responsive Design
 
 ### ✅ Mobile-First + Max-Width Utilities
 ```tsx
@@ -176,7 +175,7 @@ return <button onClick={toggleTheme}>🌙 / ☀️</button>;
 </div>
 ```
 
-### ✅ Container Queries (Experimental, but future-proof)
+### ✅ Container Queries (Future-Proof)
 ```css
 @layer utilities {
   .cq-min-w-\[400px\] {
@@ -264,7 +263,7 @@ export function cn(...inputs: ClassValue[]) {
 
 ---
 
-## 🧰 7. Essential Plugins (2025 Stack)
+## 🧰 7. Essential Plugins
 
 | Plugin | Why | Install |
 |--------|-----|---------|
@@ -348,5 +347,5 @@ npx shadcn-ui@latest add button card
 > ✅ **Summary**:  
 > *Tailwind isn’t just utility classes — it’s a design system enabler. Combine it with `cva`, `cn`, `shadcn/ui`, and dark mode hooks to build scalable, accessible, and maintainable UIs — fast.*
 
-> 🚀 **2025 Pro Move**: Use Tailwind + React Server Components + `shadcn/ui` = production-ready UI in minutes.
-
+> 🚀 **Modern Pro Move**: Use Tailwind + React Server Components + `shadcn/ui` = production-ready UI in minutes.
+```
