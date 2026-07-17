@@ -1,67 +1,66 @@
 # Atomic Design in React
 
-*Atomic Design: Principles, Practice, and Pragmatism (2025)*
-
-**Last updated:** January 18, 2026
+*Principles, Practice, and Pragmatism*
 
 **Summary**
 
-* Atomic Design is a **methodology**, not a strict rule set.
-* It is most valuable for **scaling design systems** and shared UI libraries.
-* In modern React, it works best alongside **Component-Driven Development**, **TypeScript**, and **design tokens**.
-* Excessive nesting should be avoided; favor **flat, feature-aligned structures** when possible.
+* Atomic Design is a **methodology**, not a rigid rulebook.
+* It shines when scaling **design systems** and shared UI libraries.
+* In modern React, it pairs well with **Component‑Driven Development**, **TypeScript**, and **design tokens**.
+* Avoid excessive nesting; prefer **flat, feature‑aligned structures** when they fit better.
 
 ---
 
 ## What Is Atomic Design?
 
-Atomic Design was introduced by Brad Frost as a way to think about user interfaces as a hierarchy of reusable parts.
+Atomic Design, introduced by Brad Frost, describes user interfaces as a hierarchy of reusable parts.
 
 ```
 Atoms → Molecules → Organisms → Templates → Pages
 ```
 
-| Level     | Purpose                 | React Interpretation     | Example                   |
-| --------- | ----------------------- | ------------------------ | ------------------------- |
-| Atoms     | Fundamental UI elements | Stateless primitives     | `Button`, `Input`, `Icon` |
-| Molecules | Simple compositions     | Combined atoms           | `SearchBar`, `FormField`  |
-| Organisms | Complex UI sections     | Feature-level components | `Header`, `ProductCard`   |
-| Templates | Structural layout       | Layout components        | `DashboardLayout`         |
-| Pages     | Concrete instances      | Route-level components   | `ProductPage`             |
+| Level      | Purpose                 | React Interpretation            | Example                   |
+|------------|-------------------------|---------------------------------|---------------------------|
+| **Atoms**      | Basic UI elements       | Stateless primitives            | `Button`, `Input`, `Icon` |
+| **Molecules**  | Simple compositions     | Combined atoms                  | `SearchBar`, `FormField`  |
+| **Organisms**  | Complex UI sections     | Feature‑aware components        | `Header`, `ProductCard`   |
+| **Templates**  | Structural layout       | Layout components               | `DashboardLayout`         |
+| **Pages**      | Concrete instances      | Route‑level components          | `ProductPage`             |
 
-The intent is to encourage consistency, reuse, and a shared vocabulary between design and engineering.
+The goal is to foster consistency, reuse, and a shared language between design and engineering.
 
 ---
 
 ## Practical Folder Structure
 
-This structure is suitable for medium to large React applications with shared UI concerns.
+Suitable for medium‑to‑large React applications with shared UI concerns.
 
 ```bash
 src/
 ├── components/
-│   ├── atoms/
-│   ├── molecules/
-│   ├── organisms/
-│   └── layouts/
+│   ├── atoms/               # Button, Input, Icon…
+│   ├── molecules/           # FormField, SearchBar…
+│   ├── organisms/           # Header, Footer, ProductCard…
+│   └── layouts/             # MainLayout, DashboardLayout…
 │
-├── features/
+├── features/                # Feature‑specific modules
 │   ├── product/
-│   │   ├── ui/
+│   │   ├── ui/              # Feature‑local components
 │   │   └── ProductPage.tsx
 │   └── auth/
 │
 └── styles/
-    ├── tokens/
+    ├── tokens/              # Design tokens (colors, spacing…)
     └── theme.ts
 ```
 
-Key conventions:
+**Key conventions**:
 
-* **Atoms** are presentational, accessible, and styling-agnostic.
+* **Atoms** are presentational, accessible, and framework‑agnostic.
 * **Molecules and organisms** are reusable across features.
-* Feature-specific UI lives close to its domain (`features/*/ui`).
-* Barrel exports are used to keep imports predictable.
+* Feature‑specific UI lives close to its domain (`features/*/ui`).
+* Barrel exports keep imports predictable.
+* Shared components may later be extracted into a **design system package**.
 
 ---
 
@@ -69,83 +68,91 @@ Key conventions:
 
 ### Atoms
 
-* No business logic or side effects
-* Strong accessibility defaults
-* Strict TypeScript props
+* No business logic or side effects.
+* Strong accessibility defaults (`aria-*`, `role`, focus management).
+* Strict TypeScript props with sensible defaults.
 
 ```tsx
 type ButtonProps = {
-  variant?: "primary" | "secondary" | "outline";
-  size?: "sm" | "md" | "lg";
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function Button({ variant = "primary", ...props }: ButtonProps) {
-  return <button {...props} />;
+export function Button({ variant = 'primary', size = 'md', isLoading, ...props }: ButtonProps) {
+  return (
+    <button
+      className={cn('btn', `btn-${variant}`, `btn-${size}`)}
+      disabled={isLoading || props.disabled}
+      aria-busy={isLoading}
+      {...props}
+    />
+  );
 }
 ```
 
 ### Molecules
 
-* Composed entirely from atoms
-* No data fetching
-* Designed for reuse and configurability
-
-Compound component patterns are often preferable to deeply nested props.
+* Composed entirely from atoms (and perhaps other molecules).
+* No data fetching – they receive everything via props.
+* Designed for reuse and configurability.  
+  *For complex structures, prefer **compound components** over deep prop drilling.*
 
 ### Organisms
 
-* May integrate hooks, context, or state
-* Should remain focused on a single responsibility
-* Split components that grow beyond reasonable size or complexity
+* May integrate hooks, context, or local state.
+* Should have a single, clear responsibility.
+* Split when they exceed a reasonable size or mix unrelated concerns.
 
 ---
 
-## When Atomic Design Is Not a Good Fit
+## When Atomic Design Is Not the Best Fit
 
-| Scenario                     | Preferred Approach       |
-| ---------------------------- | ------------------------ |
-| Small applications           | Flat component structure |
-| Rapid prototyping            | Page-first development   |
-| Highly custom per-feature UI | Feature-local components |
-| Minimal design reuse         | Skip atom abstraction    |
+| Scenario                   | Preferred Approach               |
+|----------------------------|----------------------------------|
+| Small applications          | Flat component structure         |
+| Rapid prototyping           | Page‑first development           |
+| Highly custom per‑feature UI| Feature‑local components         |
+| Minimal design reuse        | Skip atom abstraction            |
 
-Atomic Design should be adapted, not enforced.
+**Adapt the methodology** – don’t enforce it where it adds friction.
 
 ---
 
 ## Atomic Design and Modern Tooling
 
-| Tool          | Purpose              | Notes                                    |
-| ------------- | -------------------- | ---------------------------------------- |
-| Storybook     | Component isolation  | Works naturally with atoms and molecules |
-| Chromatic     | Visual regression    | Useful for shared design systems         |
-| Design tokens | Design consistency   | Sync design and code                     |
-| TypeScript    | Contract enforcement | Required at all levels                   |
-| Playwright    | End-to-end testing   | Focus on page-level behavior             |
+| Tool         | Purpose                          | Notes                                    |
+|--------------|----------------------------------|------------------------------------------|
+| **Storybook**   | Isolated component development   | Works naturally with atoms and molecules |
+| **Chromatic**   | Visual regression testing        | Essential for shared design systems      |
+| **Design tokens** | Design‑code consistency       | Sync colors, spacing, typography         |
+| **TypeScript**   | Contract enforcement            | Required at every level                  |
+| **Playwright**   | End‑to‑end testing              | Focus on page‑level user journeys        |
 
-Storybook documentation: [https://storybook.js.org/docs/react](https://storybook.js.org/docs/react)
+> [Storybook](https://storybook.js.org/docs/react) is the industry standard for developing and documenting UI components in isolation.
 
 ---
 
 ## Atomic Design and React Server Components
 
-Atomic Design maps cleanly to the Server Components model:
+Atomic Design maps cleanly to the **Server Components** era:
 
-* Atoms and molecules are often server-rendered and static
-* Organisms and pages may combine server and client components
-
-Avoid coupling atoms to framework-specific server logic to preserve reuse.
+* **Atoms** and **molecules** are often static – they can be Server Components by default, reducing client‑side JavaScript.
+* **Organisms** and **pages** may mix Server and Client Components.  
+  *Keep the boundary clear: move interactivity into dedicated Client Component islands.*
+* Avoid coupling presentational atoms to framework‑specific server logic – keep them portable.
 
 ---
 
 ## Further Reading
 
-* Atomic Design by Brad Frost: [https://atomicdesign.bradfrost.com](https://atomicdesign.bradfrost.com)
-* Brad Frost – Atomic Web Design article: [https://bradfrost.com/blog/post/atomic-web-design/](https://bradfrost.com/blog/post/atomic-web-design/)
-* Design Systems Handbook (InVision): [https://www.designbetter.co/design-systems-handbook](https://www.designbetter.co/design-systems-handbook)
-* When Atomic Design Goes Wrong (CSS-Tricks): [https://css-tricks.com/when-atomic-design-goes-wrong/](https://css-tricks.com/when-atomic-design-goes-wrong/)
+* [Atomic Design by Brad Frost](https://atomicdesign.bradfrost.com)
+* [Brad Frost – Atomic Web Design](https://bradfrost.com/blog/post/atomic-web-design/)
+* [Design Systems Handbook (InVision)](https://www.designbetter.co/design-systems-handbook)
+* [When Atomic Design Goes Wrong (CSS-Tricks)](https://css-tricks.com/when-atomic-design-goes-wrong/)
 
 ---
 
-Atomic Design is most effective when it provides shared language and structure without constraining delivery speed. Treat it as a guide, not a rulebook.
+> Atomic Design is most powerful when it provides a shared vocabulary without slowing you down.  
+> Treat it as a compass, not a constraint.
+```
