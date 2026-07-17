@@ -1,6 +1,6 @@
-# ⚡ TanStack Query (React Query) — Ultimate Guide
+# ⚡ TanStack Query (React Query) — The Ultimate Guide
 
-> TanStack Query (formerly React Query) is a powerful data-fetching and state management library for React that makes server-state management effortless.
+> TanStack Query (formerly React Query) is the go‑to data‑fetching and server‑state management library for React. It makes working with asynchronous server data effortless, replacing manual `useEffect`/`fetch` patterns with a declarative, cache‑first API.
 
 ---
 
@@ -8,10 +8,10 @@
 
 ```bash
 npm install @tanstack/react-query
-npm install axios
+# optional: use your preferred HTTP client (fetch, axios, ky, etc.)
 ```
 
-Optional Devtools:
+Devtools (highly recommended):
 
 ```bash
 npm install @tanstack/react-query-devtools
@@ -21,25 +21,20 @@ npm install @tanstack/react-query-devtools
 
 ## 🧱 2. Basic Setup
 
-Create a **React Query Client** and wrap your app:
+Create a `QueryClient` and wrap your app:
 
-```jsx
-// src/main.jsx
-import React from "react";
-import ReactDOM from "react-dom/client";
+```tsx
+// main.tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import App from "./App";
 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  </React.StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+    <ReactQueryDevtools initialIsOpen={false} />
+  </QueryClientProvider>
 );
 ```
 
@@ -47,15 +42,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 ## 🌐 3. Fetching Data with `useQuery`
 
-```jsx
+```tsx
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 
-const fetchUsers = async () => {
-  const { data } = await axios.get(
-    "https://jsonplaceholder.typicode.com/users"
-  );
-  return data;
+// Separate API functions (e.g., in /api/users.ts)
+const fetchUsers = async (): Promise<User[]> => {
+  const res = await fetch("/api/users");
+  if (!res.ok) throw new Error("Failed to fetch users");
+  return res.json();
 };
 
 export default function UsersList() {
@@ -64,7 +58,7 @@ export default function UsersList() {
     queryFn: fetchUsers,
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <p>Loading…</p>;
   if (isError) return <p>Error: {error.message}</p>;
 
   return (
@@ -77,37 +71,49 @@ export default function UsersList() {
 }
 ```
 
-✅ **Features:**
-- Automatic caching
-- Stale-while-revalidate
-- Refetch on focus/reconnect
+✅ **Features built‑in:**
+- Automatic caching & background refetching
+- Request deduplication
+- Stale‑while‑revalidate strategy
+- Refetch on window focus / network reconnect (configurable)
 
 ---
 
 ## 🧠 4. Query Keys (Best Practice)
 
-Query keys uniquely identify each data source.
+Query keys uniquely identify each data source and its dependencies.
 
-```jsx
+```tsx
+// Simple list
+useQuery({ queryKey: ["users"], queryFn: fetchUsers });
+
+// Detail with parameter
 useQuery({ queryKey: ["user", userId], queryFn: () => fetchUser(userId) });
+
+// With filters
+useQuery({ queryKey: ["posts", { status: "draft" }], queryFn: fetchDraftPosts });
 ```
 
-| Example Key                       | Represents     |
-| --------------------------------- | -------------- |
-| `["users"]`                       | All users      |
-| `["user", id]`                    | Specific user  |
-| `["posts", { filter: "active" }]` | Filtered posts |
+✅ **Rules:**
+- Use **descriptive, hierarchical arrays**.
+- Include all variables that the query depends on.
+- `queryFn` receives the key, but it’s usually cleaner to pass via closure.
 
 ---
 
 ## 💾 5. Mutations (POST / PUT / DELETE)
 
-```jsx
+```tsx
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 
-const addUser = async (newUser) => {
-  return await axios.post("/api/users", newUser);
+const addUser = async (newUser: Partial<User>) => {
+  const res = await fetch("/api/users", {
+    method: "POST",
+    body: JSON.stringify(newUser),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error("Failed to add user");
+  return res.json();
 };
 
 export default function AddUser() {
@@ -116,7 +122,8 @@ export default function AddUser() {
   const mutation = useMutation({
     mutationFn: addUser,
     onSuccess: () => {
-      queryClient.invalidateQueries(["users"]); // refresh list
+      // Invalidate the users list to refetch
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 
@@ -125,74 +132,60 @@ export default function AddUser() {
       onClick={() => mutation.mutate({ name: "Jackson" })}
       disabled={mutation.isPending}
     >
-      {mutation.isPending ? "Adding..." : "Add User"}
+      {mutation.isPending ? "Adding…" : "Add User"}
     </button>
   );
 }
 ```
 
-✅ **Mutation Lifecycle:**
-- `onMutate` → Optimistic update
-- `onError` → Rollback
-- `onSuccess` → Invalidate cache
+✅ **Mutation lifecycle hooks:**
+- `onMutate` → for optimistic updates
+- `onError` → rollback
+- `onSuccess` / `onSettled` → invalidate or update cache
 
 ---
 
-## ♻️ 6. Cache & Invalidation
+## ♻️ 6. Cache Management
 
-### Invalidate:
-```js
-queryClient.invalidateQueries(["users"]);
-```
+| Action               | Code                                                                 |
+| -------------------- | -------------------------------------------------------------------- |
+| Invalidate queries   | `queryClient.invalidateQueries({ queryKey: ["users"] })`             |
+| Manual refetch       | `queryClient.refetchQueries({ queryKey: ["users"] })`                |
+| Remove from cache    | `queryClient.removeQueries({ queryKey: ["users"] })`                 |
+| Prefetch (hover)     | `queryClient.prefetchQuery({ queryKey: ["post", id], queryFn })`     |
+| Set cache directly   | `queryClient.setQueryData(["user", id], updatedUser)`                |
 
-### Refetch manually:
-```js
-queryClient.refetchQueries(["users"]);
-```
-
-### Remove cache:
-```js
-queryClient.removeQueries(["users"]);
-```
-
-### Prefetch (for next route):
-```js
-queryClient.prefetchQuery({
-  queryKey: ["posts"],
-  queryFn: fetchPosts,
-});
-```
+> 💡 Prefetch data on link hover to make navigation feel instant.
 
 ---
 
-## 📆 7. Refetch Behavior
+## 📆 7. Refetch Control & Stale Time
 
 | Option                 | Description                                   |
 | ---------------------- | --------------------------------------------- |
-| `refetchOnWindowFocus` | Default `true` — refresh when tab gains focus |
-| `refetchOnReconnect`   | Default `true`                                |
-| `refetchInterval`      | Polling interval in ms                        |
-| `staleTime`            | Time data stays fresh (in ms)                 |
+| `staleTime`            | Time in ms that data is considered fresh      |
+| `gcTime`               | Time before inactive data is garbage collected |
+| `refetchOnWindowFocus` | Refetch when tab regains focus (default true)  |
+| `refetchOnReconnect`   | Refetch on network recovery                    |
+| `refetchInterval`      | Polling interval in ms                         |
 
-Example:
-
-```jsx
+```tsx
 useQuery({
   queryKey: ["todos"],
   queryFn: fetchTodos,
   refetchOnWindowFocus: false,
-  staleTime: 1000 * 60 * 5, // 5 minutes
+  staleTime: 5 * 60 * 1000, // 5 minutes
 });
 ```
 
 ---
 
-## 📜 8. Pagination Example
+## 📜 8. Pagination
 
-```jsx
-const fetchUsers = async (page) => {
-  const { data } = await axios.get(`/api/users?page=${page}`);
-  return data;
+```tsx
+const fetchUsers = async (page: number) => {
+  const res = await fetch(`/api/users?page=${page}`);
+  return res.json();
 };
 
 export default function PaginatedUsers() {
@@ -200,66 +193,58 @@ export default function PaginatedUsers() {
   const { data, isFetching } = useQuery({
     queryKey: ["users", page],
     queryFn: () => fetchUsers(page),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData, // V5: use placeholderData instead of keepPreviousData
   });
 
   return (
     <div>
-      {data?.users.map((u) => (
-        <p key={u.id}>{u.name}</p>
-      ))}
-      <button onClick={() => setPage((p) => p - 1)} disabled={page === 1}>
+      {data?.users.map((u) => <p key={u.id}>{u.name}</p>)}
+      <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>
         Prev
       </button>
       <button onClick={() => setPage((p) => p + 1)} disabled={!data?.hasMore}>
         Next
       </button>
-      {isFetching && <span> Loading...</span>}
+      {isFetching && <span> Loading…</span>}
     </div>
   );
 }
 ```
 
-✅ `keepPreviousData` keeps old data visible during refetch.
+✅ Use `placeholderData: keepPreviousData` to avoid UI flicker while fetching new page.
 
 ---
 
-## 🔁 9. Infinite Scroll Example
+## 🔁 9. Infinite Scroll
 
-```jsx
+```tsx
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const fetchPosts = async ({ pageParam = 1 }) => {
-  const { data } = await axios.get(`/api/posts?page=${pageParam}`);
-  return data;
+  const res = await fetch(`/api/posts?page=${pageParam}`);
+  return res.json();
 };
 
 function InfinitePosts() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["posts"],
-      queryFn: fetchPosts,
-      getNextPageParam: (lastPage) => lastPage.nextPage ?? false,
-    });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: ["posts"],
+    queryFn: fetchPosts,
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    initialPageParam: 1,
+  });
 
   return (
     <>
       {data?.pages.map((page, i) => (
         <React.Fragment key={i}>
-          {page.items.map((p) => (
-            <div key={p.id}>{p.title}</div>
-          ))}
+          {page.items.map((p) => <div key={p.id}>{p.title}</div>)}
         </React.Fragment>
       ))}
       <button
-        onClick={fetchNextPage}
+        onClick={() => fetchNextPage()}
         disabled={!hasNextPage || isFetchingNextPage}
       >
-        {isFetchingNextPage
-          ? "Loading..."
-          : hasNextPage
-          ? "Load More"
-          : "No More Posts"}
+        {isFetchingNextPage ? "Loading…" : hasNextPage ? "Load More" : "No More Posts"}
       </button>
     </>
   );
@@ -268,56 +253,64 @@ function InfinitePosts() {
 
 ---
 
-## 🪄 10. Optimistic Updates Example
+## 🪄 10. Optimistic Updates
 
-```jsx
+```tsx
+const updateUser = async (user) => { /* API call */ };
+
 const mutation = useMutation({
   mutationFn: updateUser,
   onMutate: async (updatedUser) => {
-    await queryClient.cancelQueries(["users"]);
+    // Cancel outgoing refetches
+    await queryClient.cancelQueries({ queryKey: ["users"] });
+    // Snapshot previous value
     const previousUsers = queryClient.getQueryData(["users"]);
+    // Optimistically update cache
     queryClient.setQueryData(["users"], (old) =>
       old.map((u) => (u.id === updatedUser.id ? updatedUser : u))
     );
     return { previousUsers };
   },
-  onError: (err, _, context) => {
-    queryClient.setQueryData(["users"], context.previousUsers);
+  onError: (err, updatedUser, context) => {
+    // Rollback on error
+    queryClient.setQueryData(["users"], context?.previousUsers);
   },
   onSettled: () => {
-    queryClient.invalidateQueries(["users"]);
+    // Refetch to ensure server state
+    queryClient.invalidateQueries({ queryKey: ["users"] });
   },
 });
 ```
 
-✅ Smooth UI even before server confirmation!
+✅ The UI updates instantly, and rolls back gracefully if the mutation fails.
 
 ---
 
 ## 🧰 11. Devtools
 
-```jsx
+```tsx
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 <QueryClientProvider client={queryClient}>
   <App />
   <ReactQueryDevtools initialIsOpen={false} />
-</QueryClientProvider>;
+</QueryClientProvider>
 ```
 
-> 💡 Use Devtools to inspect cache, invalidate queries, and debug states.
+🔍 Inspect cached data, view query states, and manually trigger refetches during development.
 
 ---
 
-## ⚙️ 12. QueryClient Configuration
+## ⚙️ 12. QueryClient Defaults
 
-```js
+```ts
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60, // 1 minute
+      staleTime: 60 * 1000, // 1 minute
+      gcTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
@@ -325,67 +318,104 @@ const queryClient = new QueryClient({
 
 ---
 
-## 💡 13. Common Patterns
+## 🧩 13. TypeScript & API Layer
 
-✅ Prefetch data on route hover  
-✅ Use `enabled: false` for conditional fetching  
-✅ Use query keys consistently  
-✅ Separate query functions into `api/` folder  
-✅ Combine React Query with **Zustand or Context** for local state  
+```ts
+// api/users.ts
+export const fetchUser = async (id: number): Promise<User> => {
+  const res = await fetch(`/api/users/${id}`);
+  if (!res.ok) throw new Error("User not found");
+  return res.json();
+};
 
----
+// hooks/useUser.ts
+import { useQuery } from "@tanstack/react-query";
+import { fetchUser } from "../api/users";
 
-## 🧱 14. Directory Example
-
-```
-src/
-├── api/
-│   └── users.js
-├── hooks/
-│   ├── useUsers.js
-│   └── useAddUser.js
-├── components/
-│   ├── UsersList.jsx
-│   └── AddUser.jsx
-└── main.jsx
+export function useUser(id: number) {
+  return useQuery({
+    queryKey: ["user", id],
+    queryFn: () => fetchUser(id),
+    enabled: !!id, // only run when id is truthy
+  });
+}
 ```
 
----
-
-## 🚨 15. Common Issues
-
-| Problem                                      | Cause / Fix                                           |
-| -------------------------------------------- | ----------------------------------------------------- |
-| "Query not re-fetching"                      | Wrong query key or no invalidation                    |
-| "Infinite loop"                              | `queryFn` not memoized (wrap in arrow or useCallback) |
-| "Error: Cannot read properties of undefined" | `data` may be undefined before fetch finishes         |
+✅ Keep API functions in a dedicated `api/` folder and hook wrappers in `hooks/` for clean separation.
 
 ---
 
-## 🧭 16. Best Practices
+## 🌐 14. Server‑Side Rendering (Next.js App Router)
 
-✅ Always use **unique and descriptive** query keys  
-✅ **Group queries** logically (`["todos", userId]`)  
-✅ **Invalidate** only necessary queries after mutations  
-✅ Use **`staleTime`** wisely to balance freshness vs performance  
-✅ Avoid `useEffect` for fetching — use `useQuery` instead  
-✅ Use **Devtools** in development for debugging  
+TanStack Query works perfectly with React Server Components and the Next.js App Router. For server‑side prefetching, use:
+
+```tsx
+// app/users/page.tsx
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import { fetchUsers } from "@/api/users";
+import UsersList from "./UsersList";
+
+export default async function UsersPage() {
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery({ queryKey: ["users"], queryFn: fetchUsers });
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <UsersList />
+    </HydrationBoundary>
+  );
+}
+```
+
+This avoids flash of loading states and delivers fully rendered HTML.
+
+---
+
+## 💡 15. Common Patterns & Best Practices
+
+- **Conditional fetching**: `useQuery({ ..., enabled: !!userId })`
+- **Dependent queries**: Chain one query after another using `enabled` based on the first’s data.
+- **Avoid `useEffect` for fetching** — always prefer `useQuery`.
+- **Separate fetching logic** into dedicated `api/` functions (easier testing & reuse).
+- **Combine with Zustand** for client‑only global UI state, and let TanStack Query manage all server state.
+- **Suspense support**: Use `useSuspenseQuery` (v5+) to integrate with React Suspense boundaries.
+
+```tsx
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+function Users() {
+  const { data } = useSuspenseQuery({ queryKey: ["users"], queryFn: fetchUsers });
+  // component suspends until data is ready
+  return <ul>{data.map(user => <li key={user.id}>{user.name}</li>)}</ul>;
+}
+```
+
+---
+
+## 🧭 16. Common Pitfalls
+
+| Issue                                       | Cause / Fix                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| "Query not re‑fetching"                     | Query key mismatch or missing invalidation                         |
+| "Infinite loop"                             | `queryFn` reference changes on every render — memoize or define outside component |
+| "data is undefined"                         | Check `isLoading`/`isSuccess` before accessing `data`              |
+| Missing `queryKey` in cache operations      | Use exact same key structure in `invalidateQueries`/`setQueryData` |
 
 ---
 
 ## 🔗 17. Resources
 
-- [Official Docs](https://tanstack.com/query/latest/docs/react/overview)
+- [Official Docs](https://tanstack.com/query/latest)
 - [TanStack Query GitHub](https://github.com/TanStack/query)
-- [React Query Patterns](https://tkdodo.eu/blog/practical-react-query)
-- [TanStack Query YouTube Playlist](https://www.youtube.com/@tannerlinsley)
-- [Axios + React Query Guide](https://react-query.tanstack.com/guides/axios)
+- [Practical React Query (TkDodo’s blog)](https://tkdodo.eu/blog/practical-react-query)
+- [Suspense & React Query](https://tanstack.com/query/latest/docs/framework/react/guides/suspense)
+- [Next.js + TanStack Query integration](https://tanstack.com/query/latest/docs/framework/react/guides/ssr)
 
 ---
 
 ## ✅ Summary
 
-> TanStack Query = effortless server state.  
-> Fetch, cache, and sync your backend with React — without Redux or context bloat.  
-> Perfect for scalable, production-ready React apps.
-
+> TanStack Query turns complex server‑state management into a declarative, performant, and developer‑friendly experience.  
+> **Fetch, cache, synchronise, and update** your backend data without touching `useEffect` or manual loading flags.  
+> It’s the backbone of modern, scalable React applications.
+```
